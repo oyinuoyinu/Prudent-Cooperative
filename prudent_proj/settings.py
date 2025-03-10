@@ -134,6 +134,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+# Ensure the static directory exists
+os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
+
 
 # Security
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']

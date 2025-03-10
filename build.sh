@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env bash
 set -o errexit
 
@@ -11,21 +9,27 @@ if [ -z "$DATABASE_URL" ]; then
     echo "No DATABASE_URL set, using SQLite"
 fi
 
+# Create static directory if it doesn't exist
+echo "Creating static directory..."
+mkdir -p static
+
 # Collect static files
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input --clear
+
+# Create initial migrations for apps without migrations
+echo "Creating initial migrations for apps..."
+python manage.py makemigrations accounts
+python manage.py makemigrations members
+python manage.py makemigrations savings
+python manage.py makemigrations loans
+python manage.py makemigrations mono
 
 # Run migrations with more verbose output and in a specific order
 echo "Running migrations..."
-python manage.py makemigrations --noinput
 python manage.py migrate auth --noinput
 python manage.py migrate contenttypes --noinput
 python manage.py migrate admin --noinput
 python manage.py migrate sessions --noinput
-python manage.py migrate accounts --noinput
-python manage.py migrate members --noinput
-python manage.py migrate savings --noinput
-python manage.py migrate loans --noinput
-python manage.py migrate mono --noinput
 python manage.py migrate --noinput
 
 # Create superuser if needed (optional)
@@ -35,4 +39,3 @@ if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] &&
 fi
 
 echo "Build completed successfully!"
-
