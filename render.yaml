@@ -23,19 +23,6 @@ services:
         sync: false
       - key: PAYSTACK_SECRET_KEY
         sync: false
-      - key: HERALD_EMAIL
-        sync: false
-      - key: HERALD_PASSWORD
-        sync: false
-      - key: HERALD_FROM_EMAIL
-        sync: false
-      - key: HERALD_FROM_NAME
-        sync: false
-      - key: HERALD_DEFAULT_FROM_EMAIL
-        sync: false
-      - key: HERALD_DEFAULT_FROM_NAME
-        sync: false
-
 databases:
   - name: prudentcorp_db
     databaseName: prudentcorp
