@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{%extends 'base.html'%}
 {% load static %}
 {% load crispy_forms_tags %}
 
@@ -37,7 +37,107 @@
 
                     <form method="post" enctype="multipart/form-data" id="membershipForm">
                         {% csrf_token %}
-                        {% crispy form %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <p class="mb-0"><strong>Important:</strong> Please fill out all required fields. A one-time membership fee of ₦2,000.00 will be collected upon submission.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="membership-form">
+                            <h5 class="mb-4">Basic Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.full_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.date_of_birth|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.state_of_origin|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.state_of_residence|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.profession|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.phone_number|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.email|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.profile_picture|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <h5 class="mb-4 mt-4">Savings Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.savings_type|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <h5 class="mb-4 mt-4">Bank Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.bank_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.account_name|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.account_number|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <h5 class="mb-4 mt-4">Next of Kin Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.next_of_kin_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.next_of_kin_relationship|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.next_of_kin_phone|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <h5 class="mb-4 mt-4">Referral Information</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    {{ form.how_did_you_hear|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    {{ form.referrer_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6 mt-4">
+                                    {{ form.referrer_is_member|as_crispy_field }}
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -46,7 +146,7 @@
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('membershipForm');
@@ -55,6 +155,40 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = 'Submitting...';
     });
+
+    // Show/hide referrer name field based on referrer_is_member checkbox
+    const referrerIsMemCheck = document.querySelector('input[name="referrer_is_member"]');
+    const referrerNameField = document.querySelector('#div_id_referrer_name');
+
+    function toggleReferrerName() {
+        if (referrerIsMemCheck && referrerNameField) {
+            if (referrerIsMemCheck.checked) {
+                referrerNameField.style.display = 'block';
+            } else {
+                referrerNameField.style.display = 'none';
+            }
+        }
+    }
+
+    // Initial toggle
+    toggleReferrerName();
+
+    // Add event listener
+    if (referrerIsMemCheck) {
+        referrerIsMemCheck.addEventListener('change', toggleReferrerName);
+    }
+
+    // Format account number to ensure it's 10 digits
+    const accountNumberField = document.querySelector('input[name="account_number"]');
+    if (accountNumberField) {
+        accountNumberField.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            e.target.value = value;
+        });
+    }
 });
 </script>
-{% endblock %}
+

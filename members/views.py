@@ -210,13 +210,8 @@ def review_application(request, application_id):
             application.approval_date = timezone.now()
             application.save()
 
-            # Create member profile
-            Member.objects.create(
-                user=application.user,
-                application=application,
-                induction_date=timezone.now().date(),
-                last_welfare_payment=timezone.now().date() if application.welfare_fee_paid else None
-            )
+            # The Member object will be created by the signal handler
+            # No need to create it here
 
             messages.success(request, 'Application approved, payments verified, and member profile created.')
         elif action == 'reject':
@@ -342,7 +337,7 @@ class PaystackCallbackView(LoginRequiredMixin, View):
                 application.payment_completed = True
                 application.payment_reference = reference
                 application.payment_date = timezone.now()
-                application.status = 'APPROVED'
+                application.status = 'PENDING'
                 application.approval_date = timezone.now()
                 application.save()
 
