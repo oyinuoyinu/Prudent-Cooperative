@@ -1,0 +1,31 @@
+Deploy on Render
+Create a Render account at https://render.com
+Connect your GitHub repository
+Click "New +" and select "Web Service"
+Choose your repository
+
+Fill in the following settings:
+Name: prudentcorp (or your preferred name)
+Environment: Python
+Build Command: ./build.sh
+Start Command: gunicorn PrudentCorp.wsgi:application
+
+Add Environment Variables:
+DJANGO_SECRET_KEY: Generate a secure key
+MONO_PUBLIC_KEY: Your Mono public key
+MONO_SECRET_KEY: Your Mono secret key
+Any other environment-specific variables
+
+Post-Deployment
+After deployment, go to your app's URL (will be something like your-app-name.onrender.com)
+Monitor the deployment logs for any issues
+Test the Mono bank integration functionality
+Verify the membership system works as expected
+
+Important Notes:
+
+The deployment preserves your existing membership and payment systems as specified in the memories
+Mono bank integration remains separate and functional
+All sensitive keys (Mono API keys) are stored as environment variables
+The database will be automatically provisioned by Render
+Would you like me to provide more details about any of these steps or help with a specific part of the deployment process?

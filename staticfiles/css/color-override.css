@@ -1,0 +1,151 @@
+/* Color Override CSS - Changes blue variants to yellow (#e7b52b) */
+
+:root {
+    --blue: #e7b52b !important;
+    --primary: #e7b52b !important;
+    --info: #e7b52b !important;
+    --default: #e7b52b !important;
+    --dropbox: #e7b52b !important;
+}
+
+/* Override primary color classes */
+.text-primary { color: #e7b52b !important; }
+.bg-primary { background-color: #e7b52b !important; }
+.border-primary { border-color: #e7b52b !important; }
+
+/* Button overrides */
+.btn-primary {
+    background-color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #d1a226 !important;
+    border-color: #d1a226 !important;
+}
+
+.btn-outline-primary {
+    color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #e7b52b !important;
+    color: #fff !important;
+}
+
+/* Link color override */
+a { color: #e7b52b !important; }
+a:hover { color: #d1a226 !important; }
+
+/* Form control focus states */
+.form-control:focus {
+    border-color: #e7b52b !important;
+    box-shadow: 0 0 0 0.2rem rgba(231, 181, 43, 0.25) !important;
+}
+
+/* Custom checkbox and radio buttons */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+/* Additional color overrides */
+.text-info { color: #e7b52b !important; }
+.bg-info { background-color: #e7b52b !important; }
+.border-info { border-color: #e7b52b !important; }
+
+.text-blue { color: #e7b52b !important; }
+.bg-blue { background-color: #e7b52b !important; }
+.border-blue { border-color: #e7b52b !important; }
+
+/* Button variants */
+.btn-info {
+    background-color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+.btn-info:hover, .btn-info:focus {
+    background-color: #d1a226 !important;
+    border-color: #d1a226 !important;
+}
+
+.btn-outline-info {
+    color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+.btn-outline-info:hover {
+    background-color: #e7b52b !important;
+    color: #fff !important;
+}
+
+/* Progress bars */
+.progress-bar {
+    background-color: #e7b52b !important;
+}
+
+/* Alerts */
+.alert-primary {
+    color: #856619 !important;
+    background-color: #fdf5e2 !important;
+    border-color: #f5e0b3 !important;
+}
+
+.alert-info {
+    color: #856619 !important;
+    background-color: #fdf5e2 !important;
+    border-color: #f5e0b3 !important;
+}
+
+/* Badges */
+.badge-primary {
+    background-color: #e7b52b !important;
+}
+
+.badge-info {
+    background-color: #e7b52b !important;
+}
+
+/* List groups */
+.list-group-item-primary {
+    color: #856619 !important;
+    background-color: #fdf5e2 !important;
+}
+
+.list-group-item-info {
+    color: #856619 !important;
+    background-color: #fdf5e2 !important;
+}
+
+/* Navigation */
+.nav-pills .nav-link.active {
+    background-color: #e7b52b !important;
+}
+
+.navbar-light .navbar-brand {
+    color: #e7b52b !important;
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: #e7b52b !important;
+    border-color: #e7b52b !important;
+}
+
+.page-link {
+    color: #e7b52b !important;
+}
+
+.page-link:hover {
+    color: #d1a226 !important;
+}
+
+/* Tables */
+.table-primary {
+    background-color: #fdf5e2 !important;
+}
+
+.table-info {
+    background-color: #fdf5e2 !important;
+}

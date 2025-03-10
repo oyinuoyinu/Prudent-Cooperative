@@ -1,0 +1,163 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block title %}Contact{% endblock title %}
+
+ <!-- LOAD HEADER HERE -->
+ {% block header %}
+
+ {% include '../includes/header.html' %}
+
+ {% endblock header %}
+
+{% block content %}
+
+
+        <main>
+            
+            <section class="section-header bg-primary text-white pb-9 pb-lg-13 mb-4 mb-lg-6">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-8 text-center">
+                            <h1 class="display-2 mb-3">Got a question?</h1>
+                            <p class="lead">Your feedback is valuable to us. If you have problems with your consultation or appointment, want to request a feature, or report a bug, we’re more than happy to help</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pattern bottom"></div>
+            </section>
+            <div class="section section-lg pt-0">
+                <div class="container mt-n8 mt-lg-n13 z-2">
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <div class="card border-light shadow-soft p-2 p-md-4 p-lg-5">
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'contact' %}" >
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label text-dark" for="firstNameLabel">First Name <span class="text-danger">*</span></label>
+                                                    <div class="input-group mb-4">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-user-alt"></i></span>
+                                                        </div>
+                                                        <input class="form-control" id="firstNameLabel" placeholder="John" type="text" name="firstName" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label text-dark" for="lastNameLabel">Last Name <span class="text-danger">*</span></label>
+                                                    <div class="input-group mb-4">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-user-alt"></i></span>
+                                                        </div>
+                                                        <input class="form-control" id="lastNameLabel" placeholder="Doe" type="text"  name="lastName" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label text-dark" for="EmailLabel">Email <span class="text-danger">*</span></label>
+                                                    <div class="input-group mb-4">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                                        </div>
+                                                        <input class="form-control" id="EmailLabel" placeholder="johndoe@company.com" type="email"  name="email" required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="form-group">
+                                                    <label class="form-label text-dark" for="phonenumberLabel">Phone Number<span class="text-danger">*</span></label>
+                                                    <div class="input-group mb-4">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text"><i class="fas fa-phone-square-alt"></i></span>
+                                                        </div>
+                                                        <input class="form-control" id="phonenumberLabel" placeholder="(+234) 950-1234-123" type="number" name="phoneNumber"  required />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 mt-4">
+                                                <div class="form-group">
+                                                    <label class="form-label text-dark" for="phonenumberLabel">How can we help you?<span class="text-danger">*</span></label>
+                                                    <textarea class="form-control" placeholder="Hi Getvet, I would like to ..." id="message-2" rows="8" name="message" required></textarea>
+                                                </div>
+                                                <div class="text-center">
+                                                    <button type="submit" class="btn btn-secondary mt-4 animate-up-2">
+                                                        <span class="mr-2"><i class="fas fa-paper-plane"></i></span>Send Message
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section section-lg pt-0 line-bottom-light">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 col-md-4 text-center px-4 mb-5 mb-lg-0">
+                            <div class="icon icon-sm icon-shape icon-shape-primary rounded mb-4"><span class="fas fa-envelope-open-text"></span></div>
+                            <h5 class="mb-3">Email us</h5>
+                            <p>Email us for general queries, including marketing and partnership opportunities.</p>
+                            <a class="font-weight-bold text-primary" href="#"><span class="__cf_email__" data-cfemail="90fff6f6f9f3f5d0f3fffde0f1fee9bef3fffd">[email&#160;protected]</span></a>
+                        </div>
+                        <div class="col-12 col-md-4 text-center px-4 mb-5 mb-lg-0">
+                            <div class="icon icon-sm icon-shape icon-shape-primary rounded mb-4"><span class="fas fa-phone-volume"></span></div>
+                            <h5 class="mb-3">Call us</h5>
+                            <p>Call us to speak to a member of our team.We are always happy to help you.</p>
+                            <a class="font-weight-bold text-primary" href="#">+ (234) 7010399266</a>
+                            <a class="font-weight-bold text-primary" href="#">+ (234) 9048093276</a>
+                        </div>
+                        <div class="col-12 col-md-4 text-center px-4">
+                            <div class="icon icon-sm icon-shape icon-shape-primary rounded mb-4"><span class="fas fa-headset"></span></div>
+                            <h5 class="mb-3">Support</h5>
+                            <p>Technical support for each product is given directly by the creators of Themesberg.</p>
+                            <a class="btn btn-sm btn-outline-primary" href="#">Support Center <span class="fas fa-long-arrow-alt-right ml-2"></span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="section section-lg pb-5 bg-soft">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 text-center mb-5">
+                            <h2 class="mb-4">Join our platform today and take control of the health and well-being of your pets!</h2>
+                            {% comment %}
+                            <p class="lead mb-5">Join over <span class="font-weight-bolder">300,000+</span> users</p>
+                            
+                            <a href="#" class="icon icon-sm text-gray mr-3"><span class="fab fa-mailchimp"></span> </a><a href="#" class="icon icon-sm text-gray mr-3"><span class="fab fa-cpanel"></span> </a>
+                            <a href="#" class="icon icon-sm text-gray mr-3"><span class="fab fa-dhl"></span> </a><a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-github-alt"></span> </a>
+                            <a href="#" class="icon icon-sm text-gray mr-3"><span class="fab fa-aws"></span> </a><a href="#" class="icon icon-sm text-gray"><span class="fab fa-node"></span></a>
+                           {% endcomment %}
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="button" class="btn btn-secondary animate-up-2" data-toggle="modal" data-target=".pricing-modal">
+                                <span class="mr-2"><i class="fas fa-hand-pointer"></i></span>Get started for free
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+          
+
+{% endblock content %}
+
+{%block footer%}
+
+{% include '../includes/footer.html' %}
+{% endblock footer%}
+
+{% block script %}
+
+{% for message in messages %}
+ swal("", '{{message}}', "success");
+{% endfor %}
+
+{% endblock script %}

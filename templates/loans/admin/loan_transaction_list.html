@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Loan Transactions{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static 'assets/img/brand/light.svg' %}" alt="Logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <h2 class="h4">Loan Transactions</h2>
+                        <p class="mb-0">Monitor and manage loan payments and transactions</p>
+                    </div>
+                </div>
+
+                <div class="card card-body shadow-sm table-wrapper table-responsive">
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <form method="get" class="d-flex">
+                                <select name="status" class="form-select me-2" onchange="this.form.submit()">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                    <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <select name="type" class="form-select me-2" onchange="this.form.submit()">
+                                    <option value="">All Types</option>
+                                    <option value="payment" {% if request.GET.type == 'payment' %}selected{% endif %}>Payment</option>
+                                    <option value="disbursement" {% if request.GET.type == 'disbursement' %}selected{% endif %}>Disbursement</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Borrower</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td>{{ transaction.reference_number }}</td>
+                                <td>
+                                    <a href="{% url 'loans:admin_loan_detail' transaction.loan.pk %}"
+                                       data-bs-toggle="tooltip"
+                                       title="View Loan Details">
+                                        {{ transaction.loan.user.get_full_name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if transaction.transaction_type == 'payment' %}info{% else %}primary{% endif %}">
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                </td>
+                                <td>₦{{ transaction.amount|floatformat:2|intcomma }}</td>
+                                <td>
+                                    {% if transaction.payment_method == 'bank_transfer' %}
+                                        <i class="fas fa-university me-1"></i>
+                                    {% elif transaction.payment_method == 'online' %}
+                                        <i class="fas fa-credit-card me-1"></i>
+                                    {% endif %}
+                                    {{ transaction.get_payment_method_display }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if transaction.status == 'approved' %}success{% elif transaction.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        {% if transaction.payment_proof %}
+                                        <a href="{{ transaction.payment_proof.url }}"
+                                           class="btn btn-sm btn-gray-100"
+                                           target="_blank"
+                                           data-bs-toggle="tooltip"
+                                           title="View Payment Proof">
+                                            <i class="fas fa-file-alt"></i>
+                                        </a>
+                                        {% endif %}
+
+                                        {% if transaction.status == 'pending' %}
+                                        <button type="button"
+                                                class="btn btn-sm btn-gray-100 edit-transaction"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editTransactionModal"
+                                                data-url="{% url 'loans:admin_loan_transaction_update' transaction.loan.pk transaction.pk %}"
+                                                title="Verify Payment">
+                                            <i class="fas fa-check-circle"></i>
+                                        </button>
+                                        {% endif %}
+
+                                        {% if transaction.loan.user.mono_account and transaction.status == 'pending' %}
+                                        <button type="button"
+                                                class="btn btn-sm btn-gray-100 verify-mono"
+                                                data-bs-toggle="tooltip"
+                                                title="Verify with Mono"
+                                                data-account-id="{{ transaction.loan.user.mono_account.account_id }}"
+                                                data-amount="{{ transaction.amount }}"
+                                                data-reference="{{ transaction.reference_number }}">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No transactions found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {% if is_paginated %}
+                    <div class="card-footer px-3 border-0 d-flex flex-column flex-lg-row align-items-center justify-content-between">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Previous</a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Verify Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTransactionForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Load edit transaction form
+    $('.edit-transaction').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editTransactionForm').attr('action', url);
+            $('#editTransactionModal .modal-body').html(data);
+        });
+    });
+
+    // Edit transaction form submission
+    $('#editTransactionForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+
+    // Mono verification
+    $('.verify-mono').on('click', function() {
+        var button = $(this);
+        var accountId = button.data('account-id');
+        var amount = button.data('amount');
+        var reference = button.data('reference');
+
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            url: '/api/mono/verify-transaction/',
+            type: 'POST',
+            data: {
+                account_id: accountId,
+                amount: amount,
+                reference: reference,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.message || 'Verification failed. Please try again.');
+                }
+            },
+            error: function() {
+                alert('An error occurred. Please try again.');
+            },
+            complete: function() {
+                button.prop('disabled', false).html('<i class="fas fa-sync-alt"></i>');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

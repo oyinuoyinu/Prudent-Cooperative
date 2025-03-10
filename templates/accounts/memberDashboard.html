@@ -1,0 +1,397 @@
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Member Dashboard{% endblock title %}
+
+
+{% block content %}
+
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">{% comment %}{% url 'home' %}{% endcomment %}
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Pixel logo" /> <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}"alt="Pixel Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            <!-- Load the navbar here -->
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h5">Member Dashboard</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'members:application_status' %}" class="btn btn-sm btn-secondary text-center text-white"><span class="fas fa-plus mr-1"></span> <span class="text-md-center">Become a Member</span></a>
+
+                        <!-- Notification Bell Icon -->
+                        <div class="dropdown ml-3">
+                            <a class="dropdown-toggle" href="#" role="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="fas fa-bell mt-1" style="font-size: 20px;"></span>
+                                {% if latest_notifications.count > 0 %}
+                                <span class="badge badge-danger" style="border-radius: 100px; position: relative; bottom:10px; left: -5px;" id="notification-badge"> {{latest_notifications.count}}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notifications-dropdown">
+                                <!-- Notifications will be dynamically added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-md-center">
+                    <div class="col-12 col-sm-6 col-xl-4 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape icon-md bg-success-soft text-success rounded-circle me-3">
+                                            <i class="fas fa-piggy-bank"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-muted">Total Savings</h6>
+                                            <h3 class="fw-extrabold mb-0">₦{{ total_savings|floatformat:0|intcomma }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <span class="badge bg-success-soft text-success">
+                                            <i class="fas fa-arrow-up me-1"></i>Active
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-4 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape icon-md bg-primary-soft text-primary rounded-circle me-3">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-muted">Total Loans</h6>
+                                            <h3 class="fw-extrabold mb-0">₦{{ total_loans|floatformat:0|intcomma }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <span class="badge bg-primary-soft text-primary">
+                                            <i class="fas fa-file-invoice-dollar me-1"></i>Loans
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-4 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape icon-md bg-warning-soft text-warning rounded-circle me-3">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-muted">Loan Balance</h6>
+                                            <h3 class="fw-extrabold mb-0">₦{{ loan_balance|floatformat:0|intcomma }}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <span class="badge bg-warning-soft text-warning">
+                                            <i class="fas fa-clock me-1"></i>Pending
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debug output -->
+                <!-- {% if debug %}
+                <div class="col-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6>Debug Information:</h6>
+                            <pre>
+Monthly Labels: {{ monthly_labels }}
+Monthly Savings: {{ monthly_savings }}
+Monthly Loans: {{ monthly_loans }}
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+                {% endif %} -->
+
+                <!-- Charts Row -->
+                <div class="row mt-4">
+                    <!-- Bar Chart -->
+                    <div class="col-12 col-lg-8 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Monthly Financial Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="monthlyOverviewChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pie Chart -->
+                    <div class="col-12 col-lg-4 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Savings Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="savingsDistributionChart" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donut Chart -->
+                    <div class="col-12 col-lg-4 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Loan Repayment Progress</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="loanProgressChart" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .icon-shape {
+                        width: 48px;
+                        height: 48px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .icon-md {
+                        width: 42px;
+                        height: 42px;
+                    }
+                    .bg-primary-soft {
+                        background-color: rgba(13, 110, 253, 0.1);
+                    }
+                    .bg-success-soft {
+                        background-color: rgba(25, 135, 84, 0.1);
+                    }
+                    .bg-warning-soft {
+                        background-color: rgba(255, 193, 7, 0.1);
+                    }
+                    .bg-info-soft {
+                        background-color: rgba(13, 202, 240, 0.1);
+                    }
+                    .text-info {
+                        color: #0dcaf0 !important;
+                    }
+                    .fw-extrabold {
+                        font-weight: 800;
+                    }
+                    .card {
+                        transition: transform 0.2s ease-in-out;
+                    }
+                    .card:hover {
+                        transform: translateY(-5px);
+                    }
+                </style>
+            </main>
+        </div>
+    </div>
+</div>
+
+{% comment %} Channels Websocket Script {% endcomment %}
+
+{{ room_name|json_script:"room-name" }}
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        const notificationSocket = new WebSocket(
+            ws_scheme + '://'
+            + window.location.host
+            + '/ws/notification/'
+            + roomName
+            + '/'
+        );
+
+        notificationSocket.onmessage = function(e) {
+           const data = JSON.parse(e.data);
+            //document.querySelector('#chat-log').value += (data.message + '\n');
+            //const myValue = data.data.value
+            //const split_string = myValue.split(" ")
+            //console.log(split_string)
+            //console.log(typeof myValue)
+            const notifier= data.data.message
+            console.log(notifier)
+            //document.getElementById('price').innerText = myValue;
+            document.getElementById("notifications-dropdown").innerHTML = "<li class='dropdown-item'>" + notifier + "</li><hr class='dropdown-divider'>" + document.getElementById("notifications-dropdown").innerHTML;
+            document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+
+    const bell = document.getElementById("notification-bell")
+    bell.addEventListener('click', function(event) {
+        if (document.getElementById("notification-badge").innerHTML != 0) {
+            // Reset the badge number
+            document.getElementById("notification-badge").innerHTML = 0;
+        }
+  });
+    </script>
+{% endblock content %}
+
+{% block script %}
+<script>
+// Get the data from Django context
+const monthlyLabels = {{ monthly_labels|safe }};
+const monthlySavings = {{ monthly_savings|safe }};
+const monthlyLoans = {{ monthly_loans|safe }};
+
+console.log("Chart Data:", {
+    labels: monthlyLabels,
+    savings: monthlySavings,
+    loans: monthlyLoans
+});
+
+// Monthly Overview Bar Chart
+const monthlyOverviewCtx = document.getElementById('monthlyOverviewChart').getContext('2d');
+const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
+    type: 'bar',
+    data: {
+        labels: monthlyLabels,
+        datasets: [{
+            label: 'Savings',
+            data: monthlySavings,
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            borderColor: 'rgba(25, 135, 84, 1)',
+            borderWidth: 1
+        },
+        {
+            label: 'Loans',
+            data: monthlyLoans,
+            backgroundColor: 'rgba(13, 110, 253, 0.2)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₦' + value.toLocaleString();
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Monthly Savings & Loans Overview'
+            }
+        }
+    }
+});
+
+// Savings Distribution Pie Chart
+const savingsDistributionCtx = document.getElementById('savingsDistributionChart').getContext('2d');
+const savingsDistributionChart = new Chart(savingsDistributionCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ savings_types|safe }},
+        datasets: [{
+            data: {{ savings_amounts|safe }},
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.2)',
+                'rgba(13, 110, 253, 0.2)',
+                'rgba(255, 193, 7, 0.2)',
+            ],
+            borderColor: [
+                'rgba(25, 135, 84, 1)',
+                'rgba(13, 110, 253, 1)',
+                'rgba(255, 193, 7, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: true,
+                text: 'Savings by Type'
+            }
+        }
+    }
+});
+
+// Loan Progress Donut Chart
+const loanProgressCtx = document.getElementById('loanProgressChart').getContext('2d');
+const loanProgressChart = new Chart(loanProgressCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Paid', 'Remaining'],
+        datasets: [{
+            data: [{{ loan_paid }}, {{ loan_remaining }}],
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.2)',
+                'rgba(220, 53, 69, 0.2)'
+            ],
+            borderColor: [
+                'rgba(25, 135, 84, 1)',
+                'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: true,
+                text: 'Loan Repayment Progress'
+            }
+        }
+    }
+});
+</script>
+{% endblock script %}

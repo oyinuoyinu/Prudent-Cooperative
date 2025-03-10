@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Link Bank Account - Prudent Women{% endblock title %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <div class="container py-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Link Your Bank Account</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-4">
+                                    Securely connect your bank account to proceed. Your data is encrypted and secure.
+                                </p>
+                                <button id="launch-mono" class="btn btn-primary">
+                                    <i class="fas fa-link me-2"></i>Link Bank Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://connect.withmono.com/connect.js"></script>
+<script>
+    document.getElementById('launch-mono').addEventListener('click', function() {
+        const config = {
+            key: "{{ mono_public_key }}",
+            scope: "auth",
+            data: {
+                reference: "{{ reference }}"
+            },
+            onSuccess: function(response) {
+                fetch('{% url "mono:connect_callback" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        code: response.code
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert('Failed to link account: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while linking your account');
+                });
+            },
+            onClose: function() {
+                console.log('Widget closed');
+            }
+        };
+
+        const connect = new Connect(config);
+        connect.setup();
+        connect.open();
+    });
+</script>
+{% endblock %}

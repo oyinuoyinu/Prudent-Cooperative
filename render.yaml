@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: prudentcorp
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn PrudentCorp.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: prudentcorp_db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: false
+      - key: MONO_PUBLIC_KEY
+        sync: false
+      - key: MONO_SECRET_KEY
+        sync: false
+
+databases:
+  - name: prudentcorp_db
+    databaseName: prudentcorp
+    plan: free

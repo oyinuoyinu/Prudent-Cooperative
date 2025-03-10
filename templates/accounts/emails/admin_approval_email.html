@@ -1,0 +1,12 @@
+{% autoescape off %}
+
+Hi {{user.first_name}},
+
+{% if is_approved %}
+Congratulations! Your licence has been approved by our admin team. --GetVet
+{% else %}
+We're sorry! You are not eligible for publishing your services on our platform. For more details, please contact support@getvetplatform.com. --GetVet
+{% endif %}
+
+
+{% endautoescape %}

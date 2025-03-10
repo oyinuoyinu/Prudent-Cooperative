@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Transaction Details - {{ transaction.reference_number }}{% endblock title %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Prudent logo" />
+        <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}" alt="Prudent Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'savings:admin_transaction_list' %}">Transactions</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">{{ transaction.reference_number }}</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h5">Transaction Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% if transaction.status == 'pending' %}
+                        <button type="button" class="btn btn-sm btn-primary edit-transaction"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editTransactionModal"
+                                data-url="{% url 'savings:admin_transaction_update' transaction.pk %}">
+                            <i class="fas fa-pencil-alt me-2"></i>Update Status
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Transaction Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Reference Number</h6>
+                                        <p class="mb-0">{{ transaction.reference_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Amount</h6>
+                                        <p class="mb-0 fw-bold">₦{{ transaction.amount|floatformat:2|intcomma }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Transaction Type</h6>
+                                        <span class="badge {% if transaction.transaction_type == 'deposit' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ transaction.get_transaction_type_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Status</h6>
+                                        <span class="badge {% if transaction.status == 'approved' %}bg-success{% elif transaction.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ transaction.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Transaction Date</h6>
+                                        <p class="mb-0">{{ transaction.transaction_date|date:"M d, Y H:i" }}</p>
+                                    </div>
+                                    {% if transaction.approval_date %}
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Approval Date</h6>
+                                        <p class="mb-0">{{ transaction.approval_date|date:"M d, Y H:i" }}</p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="col-12">
+                                        <h6 class="text-muted mb-2">Description</h6>
+                                        <p class="mb-0">{{ transaction.description|default:"No description provided." }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Member Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Member Name</h6>
+                                    <p class="mb-0">{{ transaction.savings_plan.user.first_name }} {{ transaction.savings_plan.user.last_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Savings Plan</h6>
+                                    <p class="mb-0">{{ transaction.savings_plan.get_plan_type_display }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Plan Balance</h6>
+                                    <p class="mb-0 fw-bold">₦{{ transaction.savings_plan.amount|floatformat:2|intcomma }}</p>
+                                </div>
+                                {% if transaction.proof_of_payment %}
+                                <div>
+                                    <h6 class="text-muted mb-2">Proof of Payment</h6>
+                                    <a href="{{ transaction.proof_of_payment.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                        <i class="fas fa-download me-2"></i>View Document
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Transaction Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTransactionForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    // Load edit form
+    $('.edit-transaction').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editTransactionForm').attr('action', url);
+            $('#editTransactionModal .modal-body').html(data);
+        });
+    });
+
+    // Edit form submission
+    $('#editTransactionForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#editTransactionModal').modal('hide');
+                    window.location.href = response.redirect_url;
+                } else {
+                    var errorDiv = $('#editFormErrors');
+                    errorDiv.html('');
+                    for (var field in response.errors) {
+                        errorDiv.append('<p>' + field + ': ' + response.errors[field] + '</p>');
+                    }
+                    errorDiv.removeClass('d-none');
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

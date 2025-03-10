@@ -1,0 +1,34 @@
+# requirements.txt
+
+python-decouple
+psycopg2
+dj-database-url
+whitenoise
+gunicorn
+pillow
+django-jazzmin
+django-multiselectfield
+django-crispy-forms
+crispy-bootstrap5
+django-taggit
+django-comments-xtd
+django-ckeditor-5
+easy-thumbnails
+django-social-share
+django-smart-selects
+python-dateutil
+simplejson
+requests
+pyjwt
+celery
+django-celery-results
+redis
+django-celery-beat
+django-extensions
+channels-redis
+channels[daphne]
+attrs
+django-imagekit
+cloudinary
+django-cloudinary-storage
+django==3.10  # Ensure this matches the required Django version

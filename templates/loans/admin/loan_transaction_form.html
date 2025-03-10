@@ -1,0 +1,169 @@
+{% load widget_tweaks %}
+
+<div class="row g-3">
+    {% if form.non_field_errors %}
+    <div class="col-12">
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Transaction Status -->
+    <div class="col-12">
+        <label class="form-label">Transaction Status</label>
+        {% render_field form.status class="form-select" %}
+        {% if form.status.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.status.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Transaction Information (Read-only) -->
+    <div class="col-12">
+        <div class="card bg-gray-50">
+            <div class="card-body">
+                <h6 class="card-title">Transaction Details</h6>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Reference Number</label>
+                        <p class="mb-0">{{ transaction.reference_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Amount</label>
+                        <p class="mb-0">₦{{ transaction.amount|floatformat:2|intcomma }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Transaction Type</label>
+                        <p class="mb-0">{{ transaction.get_transaction_type_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Payment Method</label>
+                        <p class="mb-0">{{ transaction.get_payment_method_display }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Verification Section -->
+    {% if transaction.payment_proof %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Payment Proof</h6>
+                <div class="mb-3">
+                    <a href="{{ transaction.payment_proof.url }}" class="btn btn-sm btn-primary" target="_blank">
+                        <i class="fas fa-file-alt me-2"></i>View Payment Proof
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mono Bank Verification -->
+    {% if transaction.loan.user.mono_account and transaction.status == 'pending' %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">Bank Account Verification</h6>
+                <p class="text-muted mb-3">Verify payment using connected bank account</p>
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary verify-mono"
+                        data-account-id="{{ transaction.loan.user.mono_account.account_id }}"
+                        data-amount="{{ transaction.amount }}"
+                        data-reference="{{ transaction.reference_number }}">
+                    <i class="fas fa-sync-alt me-2"></i>Verify with Mono
+                </button>
+                <div id="monoVerificationResult" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Description/Notes -->
+    <div class="col-12">
+        <label class="form-label">Verification Notes</label>
+        {% render_field form.description class="form-control" rows="3" placeholder="Enter any notes about the verification..." %}
+        {% if form.description.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.description.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Mono verification
+    $('.verify-mono').on('click', function() {
+        var button = $(this);
+        var resultDiv = $('#monoVerificationResult');
+        var accountId = button.data('account-id');
+        var amount = button.data('amount');
+        var reference = button.data('reference');
+
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Verifying...');
+        resultDiv.hide();
+
+        $.ajax({
+            url: '/api/mono/verify-transaction/',
+            type: 'POST',
+            data: {
+                account_id: accountId,
+                amount: amount,
+                reference: reference,
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    resultDiv
+                        .removeClass('alert-danger')
+                        .addClass('alert alert-success')
+                        .html('<i class="fas fa-check-circle me-2"></i>' + response.message)
+                        .show();
+
+                    // Auto-update form if verification successful
+                    $('#id_status').val('approved');
+                    if (!$('#id_description').val()) {
+                        $('#id_description').val('Payment verified through Mono bank statement.');
+                    }
+                } else {
+                    resultDiv
+                        .removeClass('alert-success')
+                        .addClass('alert alert-danger')
+                        .html('<i class="fas fa-exclamation-circle me-2"></i>' +
+                              (response.message || 'Verification failed. Please verify manually.'))
+                        .show();
+                }
+            },
+            error: function() {
+                resultDiv
+                    .removeClass('alert-success')
+                    .addClass('alert alert-danger')
+                    .html('<i class="fas fa-exclamation-circle me-2"></i>An error occurred. Please try again.')
+                    .show();
+            },
+            complete: function() {
+                button.prop('disabled', false).html('<i class="fas fa-sync-alt me-2"></i>Verify with Mono');
+            }
+        });
+    });
+
+    // Status change handler
+    $('#id_status').on('change', function() {
+        var status = $(this).val();
+        if (status === 'rejected' && !$('#id_description').val()) {
+            $('#id_description').attr('placeholder', 'Please provide a reason for rejecting this transaction...');
+        }
+    });
+});
+</script>

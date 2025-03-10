@@ -1,0 +1,152 @@
+{% load widget_tweaks %}
+
+<div class="row g-3">
+    {% if form.non_field_errors %}
+    <div class="col-12">
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Application Status -->
+    <div class="col-12">
+        <label class="form-label">Application Status</label>
+        {% render_field form.status class="form-select" %}
+        {% if form.status.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.status.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Review Notes -->
+    <div class="col-12">
+        <label class="form-label">Review Notes</label>
+        {% render_field form.review_notes class="form-control" rows="4" placeholder="Enter your review notes here..." %}
+        {% if form.review_notes.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.review_notes.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted">
+            Please provide detailed notes about your decision, especially if rejecting the application.
+        </small>
+    </div>
+
+    <!-- Read-only Fields -->
+    <div class="col-12">
+        <div class="card bg-gray-50">
+            <div class="card-body">
+                <h6 class="card-title">Application Details</h6>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Loan Amount</label>
+                        <p class="mb-0">₦{{ application.loan_amount|floatformat:2|intcomma }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Tenure</label>
+                        <p class="mb-0">{{ application.tenure.duration }} months</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-muted">Purpose</label>
+                        <p class="mb-0">{{ application.purpose }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- If approving, show additional fields -->
+    <div class="col-12 approval-fields" style="display: none;">
+        <div class="card border-success">
+            <div class="card-body">
+                <h6 class="card-title text-success">Approval Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Monthly Payment</label>
+                        {% render_field form.monthly_payment class="form-control" readonly="readonly" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Total Payable</label>
+                        {% render_field form.total_payable class="form-control" readonly="readonly" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">First Payment Date</label>
+                        {% render_field form.next_payment_date class="form-control" type="date" %}
+                        {% if form.next_payment_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.next_payment_date.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Final Payment Date</label>
+                        {% render_field form.final_payment_date class="form-control" type="date" %}
+                        {% if form.final_payment_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.final_payment_date.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Show/hide approval fields based on status
+    function toggleApprovalFields() {
+        var status = $('#id_status').val();
+        if (status === 'approved') {
+            $('.approval-fields').slideDown();
+        } else {
+            $('.approval-fields').slideUp();
+        }
+    }
+
+    // Initial state
+    toggleApprovalFields();
+
+    // On status change
+    $('#id_status').on('change', function() {
+        toggleApprovalFields();
+    });
+
+    // Calculate loan details when amount or tenure changes
+    function calculateLoanDetails() {
+        var amount = {{ application.loan_amount }};
+        var tenure = {{ application.tenure.duration }};
+        var interestRate = {{ application.loan_plan.interest_rate }};
+
+        // Monthly interest rate
+        var monthlyRate = interestRate / 12 / 100;
+
+        // Monthly payment using loan amortization formula
+        var monthlyPayment = amount * monthlyRate * Math.pow(1 + monthlyRate, tenure) /
+                            (Math.pow(1 + monthlyRate, tenure) - 1);
+
+        // Total payable
+        var totalPayable = monthlyPayment * tenure;
+
+        // Update fields
+        $('#id_monthly_payment').val(monthlyPayment.toFixed(2));
+        $('#id_total_payable').val(totalPayable.toFixed(2));
+    }
+
+    // Calculate initial values
+    calculateLoanDetails();
+});
+</script>

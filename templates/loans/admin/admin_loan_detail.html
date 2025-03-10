@@ -1,0 +1,338 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Loan Details - {{ loan.id }}{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static 'assets/img/brand/light.svg' %}" alt="Logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'loans:admin_loan_list' %}">Loans</a></li>
+                                <li class="breadcrumb-item active">{{ loan.id }}</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Loan Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-primary edit-loan"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editLoanModal"
+                                data-url="{% url 'loans:admin_loan_update' loan.pk %}">
+                            <i class="fas fa-edit me-2"></i>Update Loan
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <!-- Loan Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Loan Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Loan ID</h6>
+                                        <p class="mb-0">{{ loan.id }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Loan Amount</h6>
+                                        <p class="mb-0 fw-bold">₦{{ loan.loan_amount|floatformat:2|intcomma }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Monthly Payment</h6>
+                                        <p class="mb-0">₦{{ loan.monthly_payment|floatformat:2|intcomma }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Total Payable</h6>
+                                        <p class="mb-0">₦{{ loan.total_payable|floatformat:2|intcomma }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Loan Status</h6>
+                                        <span class="badge bg-{{ loan.status|yesno:'success,warning' }}">
+                                            {{ loan.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Payment Status</h6>
+                                        <span class="badge bg-{{ loan.payment_status|yesno:'success,danger' }}">
+                                            {{ loan.get_payment_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Next Payment Date</h6>
+                                        <p class="mb-0">{{ loan.next_payment_date|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Final Payment Date</h6>
+                                        <p class="mb-0">{{ loan.final_payment_date|date:"M d, Y" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History -->
+                        <div class="card border-0 shadow">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Transaction History</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                                <th>Reference</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for transaction in transactions %}
+                                            <tr>
+                                                <td>{{ transaction.created_at|date:"M d, Y" }}</td>
+                                                <td>{{ transaction.get_transaction_type_display }}</td>
+                                                <td>₦{{ transaction.amount|floatformat:2|intcomma }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ transaction.status|yesno:'success,warning' }}">
+                                                        {{ transaction.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ transaction.reference_number }}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-gray-100 edit-transaction"
+                                                            data-bs-toggle="modal" data-bs-target="#editTransactionModal"
+                                                            data-url="{% url 'loans:admin_loan_transaction_update' loan.pk transaction.pk %}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center">No transactions found</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <!-- Borrower Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Borrower Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Full Name</h6>
+                                    <p class="mb-0">{{ loan.user.get_full_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Email</h6>
+                                    <p class="mb-0">{{ loan.user.email }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Phone Number</h6>
+                                    <p class="mb-0">{{ loan.user.phone_number }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Member Since</h6>
+                                    <p class="mb-0">{{ loan.user.date_joined|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loan Plan Information -->
+                        <div class="card border-0 shadow">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Loan Plan Details</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Plan Type</h6>
+                                    <p class="mb-0">{{ loan.loan_plan.name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Interest Rate</h6>
+                                    <p class="mb-0">{{ loan.loan_plan.interest_rate }}% per annum</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Tenure</h6>
+                                    <p class="mb-0">{{ loan.tenure.duration }} months</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Loan Modal -->
+<div class="modal fade" id="editLoanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Loan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editLoanForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTransactionForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editTransactionFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load edit loan form
+    $('.edit-loan').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editLoanForm').attr('action', url);
+            $('#editLoanModal .modal-body').html(data);
+        });
+    });
+
+    // Edit loan form submission
+    $('#editLoanForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+
+    // Load edit transaction form
+    $('.edit-transaction').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editTransactionForm').attr('action', url);
+            $('#editTransactionModal .modal-body').html(data);
+        });
+    });
+
+    // Edit transaction form submission
+    $('#editTransactionForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editTransactionFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editTransactionFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+
+
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Member Dashboard{% endblock title %}
+
+
+{% block content %}
+
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">{% comment %}{% url 'home' %}{% endcomment %}
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Pixel logo" /> <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}"alt="Pixel Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            <!-- Load the navbar here -->
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Savings</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h5">Create Saving Plans</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'savings:create_plan' %}" class="btn btn-sm btn-primary text-center text-white"><span class="fas fa-plus mr-1"></span> <span class="text-md-center">Create Savings Plan</span></a>
+
+                        <!-- Notification Bell Icon -->
+                        <div class="dropdown ml-3">
+                            <a class="dropdown-toggle" href="#" role="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="fas fa-bell mt-1" style="font-size: 20px;"></span>
+                                {% if latest_notifications.count > 0 %}
+                                <span class="badge badge-danger" style="border-radius: 100px; position: relative; bottom:10px; left: -5px;" id="notification-badge"> {{latest_notifications.count}}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notifications-dropdown">
+                                <!-- Notifications will be dynamically added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-9">
+                        <div class="row">
+                            <div class="col-12">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    {% load crispy_forms_tags %}
+                                    {{ form|crispy }}
+                                    <button type="submit" class="btn btn-primary">Create</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+
+            </main>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+
+
+

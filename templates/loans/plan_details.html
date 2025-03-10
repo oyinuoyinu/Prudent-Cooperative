@@ -1,0 +1,405 @@
+
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Loan Plan Details{% endblock title %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Pixel logo" />
+        <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}" alt="Pixel Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Loans</li>
+                            </ol>
+                        </nav>
+                        <div class="mb-4">
+                            <a href="{% url 'loans:plans_list' %}" class="text-decoration-none text-muted">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Loan Plans
+                            </a>
+                        </div>
+                        <h2 class="h5">Loan Plan Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'loans:application_create' plan.id %}" class="btn btn-sm btn-primary text-center text-white">
+                            <span class="fas fa-plus mr-1"></span>
+                            <span class="text-md-center">Apply for Loan</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-money-bill-wave text-primary me-2"></i>
+                                        {{plan.get_plan_type_display}}
+                                    </h5>
+                                    <span class="badge bg-primary-soft text-primary">{{plan.plan_type|title}}</span>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <div class="bg-light rounded-3 p-4">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="display-6 fw-bold text-primary mb-0">
+                                                    <span style="font-size: 16px;">₦</span>
+                                                    {{plan.amount|intcomma|default:"0"}}
+                                                </div>
+                                                <div class="ms-auto">
+                                                    <span class="badge bg-success-soft text-success">
+                                                        <i class="fas fa-chart-line me-1"></i>
+                                                        {{plan.interest_rate}}% Interest
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted mb-0">Total Active Loans</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-calendar-alt text-primary fa-2x"></i>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <div class="small text-muted mb-1">Tenure</div>
+                                                    <div class="fw-semibold">{{tenure_months}} months</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="border rounded-3 p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-money-check-alt text-primary fa-2x"></i>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <div class="small text-muted mb-1">Total Payable</div>
+                                                    <div class="fw-semibold">₦{{plan.amount|floatformat:0|intcomma}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h6 class="text-muted mb-4">Quick Actions</h6>
+
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'loans:application_create' plan.id %}" class="btn btn-primary text-white">
+                                        <i class="fas fa-file-alt me-2"></i> Apply for Loan
+                                    </a>
+
+                                    <!-- {% if active_loans == 0 %}
+                                    <a href="{% url 'loans:loan_payment' plan.id %}" class="btn btn-success">
+                                        <i class="fas fa-money-bill me-2"> Online Repayment</i>
+                                    </a>
+                                    {% endif %}
+                                    {% if active_loans == 0 %}
+                                    <a href="#" class="btn btn-outline-danger">
+                                        <i class="fas fa-minus me-2">Make Deposit</i>
+                                    </a>
+                                    {% endif %} -->
+                                </div>
+
+                                <div class="mt-4">
+                                    <h6 class="mb-3">Loan Requirements</h6>
+                                    <div class="alert alert-info">
+                                        {{ requirements|linebreaks }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-primary-soft text-primary">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-1">Total Loan Amount</h6>
+                                            <h4 class="mb-0">₦{{ plan.amount|intcomma }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-success-soft text-success">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-1">Pending Transactions</h6>
+                                            <h4 class="mb-0">{{ pending_transactions|intcomma }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle bg-warning-soft text-warning">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <h6 class="mb-1">Pending Applications</h6>
+                                            <h4 class="mb-0">{{pending_applications }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="card border-0 shadow">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Recent Applications</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if loan_applications %}
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap mb-0 rounded">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="border-0">Application ID</th>
+                                                <th class="border-0">Date</th>
+                                                <th class="border-0">Amount</th>
+                                                <th class="border-0">Tenure</th>
+                                                <th class="border-0">Status</th>
+                                                <th class="border-0">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for application in loan_applications %}
+                                            <tr>
+                                                <td>#{{application.id}}</td>
+                                                <td>{{application.application_date|date:"M d, Y"}}</td>
+                                                <td>₦{{application.loan_amount|intcomma}}</td>
+                                                <td>{{application.tenure.months}} months</td>
+                                                <td>
+                                                    <span class="badge {% if application.status == 'approved' %}bg-success{% elif application.status == 'rejected' %}bg-danger{% elif application.status == 'under_review' %}bg-warning{% else %}bg-primary{% endif %}">
+                                                        {{application.get_status_display}}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'loans:application_detail' application.id %}" class="btn btn-sm btn-primary text-white">
+                                                        <i class="fas fa-eye me-2"></i>View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {% if loan_applications.paginator.num_pages > 1 %}
+                                <div class="px-4 py-3 border-top">
+                                    {% include 'includes/pagination.html' with page_obj=loan_applications %}
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <h4>No applications found</h4>
+                                    <p class="text-muted">No loan applications have been submitted yet.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="card border-0 shadow">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Disbursed Loans</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-centered table-nowrap mb-0 rounded">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Loan ID</th>
+                                                <th>Amount</th>
+                                                <th>Balance</th>
+                                                <th>Status</th>
+                                                <th>Progress</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for loan in loans %}
+                                            <tr>
+                                                <td>#{{ loan.id }}</td>
+                                                <td>₦{{ loan.loan_amount|intcomma }}</td>
+                                                <td>₦{{ loan.loan_balance|intcomma }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ loan.status }}-soft text-{{ loan.status }}">
+                                                        {{ loan.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="progress" style="height: 5px;">
+                                                        <div class="progress-bar bg-success" role="progressbar"
+                                                             style="width: {{ loan.payment_progress }}%"
+                                                             aria-valuenow="{{ loan.payment_progress }}"
+                                                             aria-valuemin="0"
+                                                             aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">{{ loan.payment_progress|floatformat:1 }}%</small>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'loans:loan_detail' loan.pk %}"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        View Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4">
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-info-circle mb-2"></i>
+                                                        <p class="mb-0">No active loans found for this plan.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                                {% if loans.has_other_pages %}
+                                <div class="card-footer px-3 border-0 d-flex flex-column flex-lg-row align-items-center justify-content-between">
+                                    <nav aria-label="Loans navigation">
+                                        <ul class="pagination mb-0">
+                                            {% if loans.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?loans_page={{ loans.previous_page_number }}">Previous</a>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">Previous</span>
+                                            </li>
+                                            {% endif %}
+
+                                            {% for num in loans.paginator.page_range %}
+                                                {% if loans.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?loans_page={{ num }}">{{ num }}</a>
+                                                </li>
+                                                {% endif %}
+                                            {% endfor %}
+
+                                            {% if loans.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?loans_page={{ loans.next_page_number }}">Next</a>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">Next</span>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                    <div class="fw-normal small mt-4 mt-lg-0">
+                                        Showing <b>{{ loans.start_index }}-{{ loans.end_index }}</b> out of <b>{{ loans.paginator.count }}</b> entries
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-active-soft { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-completed-soft { background-color: rgba(13, 202, 240, 0.1); }
+    .bg-defaulted-soft { background-color: rgba(220, 53, 69, 0.1); }
+
+    .text-active { color: #198754; }
+    .text-completed { color: #0dcaf0; }
+    .text-defaulted { color: #dc3545; }
+    </style>
+{% endblock content %}

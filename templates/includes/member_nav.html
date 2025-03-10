@@ -1,0 +1,99 @@
+{% load static %}
+
+<nav id="sidebarMenu" class="sidebar d-md-block bg-primary text-white collapse px-4">
+    <div class="sidebar-sticky pt-4 mx-auto">
+        <div class="user-card d-flex align-items-center justify-content-between justify-content-md-center pb-4">
+            <div class="d-flex align-items-center">
+                {% if user_profile.profile_picture %}
+                <div class="user-avatar lg-avatar mr-4"><img src="{{user_profile.profile_picture_thumbnail.url}}" class="card-img-top rounded-circle border-white" alt="Profile Pic" /></div>
+                {%else%}
+                <div class="user-avatar lg-avatar mr-4"><img src="{% static './assets/img/default_profile_pic.png' %}" class="card-img-top rounded-circle border-white" alt="Profile Pic" /></div>
+                {% endif %}
+                <div class="d-block">
+                    {%if user.is_authenticated%}
+                    <h2 class="h6">Hi, {{ user.first_name }}</h2>
+                    <a href="{% url 'logout' %}" class="btn btn-secondary btn-xs">
+                        <span class="mr-2"><span class="fas fa-sign-out-alt"></span></span>Sign Out
+                    </a>
+                    {%endif%}
+                </div>
+            </div>
+            <div class="collapse-close d-md-none">
+                <a href="#sidebarMenu" class="fas fa-times" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation"></a>
+            </div>
+        </div>
+
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item {% if section == 'dashboard' %} active {%endif%}">
+                <a href="{% url 'members:memberDashboard' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-chart-pie"></span></span> <span>Dashboard</span>
+                </a>
+            </li>
+
+            {% if user.is_member %}
+            <li class="nav-item {% if section == 'savings' %} active {%endif%}">
+                <a href="{% url 'savings:plans_list' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-piggy-bank"></span></span> <span>Savings</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if user.is_member %}
+            <li class="nav-item {% if section == 'loans' %} active {%endif%}">
+                <a href="{% url 'loans:plans_list' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-money-bill-wave"></span></span> <span>Loans</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if user.is_member %}
+            <li class="nav-item {% if section == 'profile' %} active {%endif%}">
+                <a href="{% url 'member_profile' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-user"></span></span> <span>Account Profile</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item {% if section == 'banks' %} active {%endif%}">
+                <a href="{% url 'members:profile' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-university"></span></span> <span>Member Profile</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<style>
+    .nav-link, .sidebar-icon {
+        color: white !important;
+        background-color: transparent !important;
+    }
+    .nav-link:hover, .nav-item.active .nav-link {
+        color: black !important;
+        background-color: white !important;
+        cursor: pointer;
+    }
+    .nav-link:hover .sidebar-icon, .nav-item.active .nav-link .sidebar-icon {
+                color: black !important;
+            }
+            .user-card h2, .user-card a {
+                color: white !important;
+            }
+            .nav-item.pending-approval {
+                display: none;
+            }
+            .dropdown-item:hover {
+                background-color: transparent !important;
+            }
+            .nav-link:focus,
+            .dropdown-toggle:focus {
+                outline: none !important;
+                box-shadow: none !important;
+                background-color: transparent !important;
+            }
+            /* Ensure clean state after interaction */
+            .nav-link:not(:hover):not(.active),
+            .dropdown-toggle:not(:hover):not(.active) {
+                background-color: transparent !important;
+            }
+
+</style>

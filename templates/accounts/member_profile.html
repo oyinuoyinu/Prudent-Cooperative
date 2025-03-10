@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div>
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item"><a href="#"><span class="fas fa-home"></span></a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Account Profile</h2>
+                        <p class="mb-0">Manage your account settings and profile information</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <!-- Profile Form Card -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Profile Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+
+                                    <!-- User Info Section -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="form-label">Email</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </span>
+                                                    <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="form-label">Member Since</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-calendar"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control" value="{{ user.date_joined|date:'F d, Y' }}" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Crispy Form Fields -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            {% crispy profile_form %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Update Profile
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Summary Card -->
+                    <div class="col-12 col-xl-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card border-0 shadow mb-4">
+                                    <div class="card-header">
+                                        <h2 class="fs-5 fw-bold mb-0">Profile Summary</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-center mb-4">
+                                            {% if user.userprofile.profile_picture %}
+                                                <img src="{{ user.userprofile.profile_picture.url }}" class="rounded-circle" width="100" height="100" alt="Profile Picture">
+                                            {% else %}
+                                                <div class="avatar-placeholder">
+                                                    <i class="fas fa-user fa-3x"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <h3 class="h6 text-center mb-3">{{ user.get_full_name }}</h3>
+                                        <div class="list-group list-group-flush">
+                                            <div class="list-group-item px-0">
+                                                <span class="me-2"><i class="fas fa-envelope text-primary"></i></span>
+                                                {{ user.email }}
+                                            </div>
+                                            {% if user.userprofile.phone_number %}
+                                            <div class="list-group-item px-0">
+                                                <span class="me-2"><i class="fas fa-phone text-primary"></i></span>
+                                                {{ user.userprofile.phone_number }}
+                                            </div>
+                                            {% endif %}
+                                            {% if user.userprofile.address %}
+                                            <div class="list-group-item px-0">
+                                                <span class="me-2"><i class="fas fa-map-marker-alt text-primary"></i></span>
+                                                {{ user.userprofile.address }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+
+    .form-control {
+        border: 1px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        height: auto;
+    }
+
+    .form-control:focus {
+        border-color: #6c757d;
+        box-shadow: none;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .card {
+        transition: all 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .list-group-item {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e9ecef !important;
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #252f40;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block title %}About{% endblock title %}
+
+ <!-- LOAD HEADER HERE -->
+ {% block header %}
+
+ {% include '../includes/header.html' %}
+
+ {% endblock header %}
+
+{% block content %}
+
+
+<main>
+   
+    <section class="section-header pb-10 pb-lg-11 mb-4 mb-lg-6 bg-primary text-white">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 text-center mb-4 mb-lg-5">
+                    <h1 class="display-2 font-weight-extreme mb-4">About GetVet</h1> 
+                </div>
+            </div>
+        </div>
+        <div class="pattern bottom"></div>
+    </section>
+    <section class="section section-lg pt-0">
+        <div class="container mt-n8 mt-lg-n11 z-2">
+            <div class="row justify-content-center">
+                <div class="col">
+                    <div class="card shadow-soft border-light p-4 p-md-5">
+                        <p class="lead mb-5">
+                            <strong class="font-weight-extreme">GetVet</strong> is a leading provider of veterinary telemedicine services for pets and livestock in Nigeria. Our mission is to make animal healthcare affordable and accessible to more people, especially in remote areas, and improve the health and well-being of pets and livestock.
+                            
+                        </p>
+                        <p class="lead mb-5">
+                            We understand the importance of having access to quality veterinary care for your furry companions, and that's why we offer a wide range services including 24/7 chat and video call consultations, home consultations, a diagnostic lab directory, and a vaccination tracker.  
+                        </p>
+
+                        <p class="lead mb-5">
+                            Our team of experienced veterinarians is dedicated to providing expert advice and guidance for all your pet and livestock health concerns. We are committed to staying up-to-date with the latest advancements in veterinary medicine and using the latest technology to provide the best care possible. 
+                        </p>
+
+                        <p class="lead mb-5">
+                            We also have a blog where we provide educational articles to help you take better care of your pets and livestock. Our goal is to empower animal owners with the knowledge they need to make informed decisions about their animal's health.  
+                        </p>
+
+                        <p class="lead mb-5">
+                            At GetVet, we believe that every pet and livestock deserve the best care possible, and we are committed to making that a reality for you. Contact us today to learn more about how we can help you take better care of your furry companions.
+                        </p>
+
+                        <h2>Our Services:</h2>
+                        <ul class="list-unstyled mb-5">
+                            <li class="py-3 lead">
+                                <div class="media">
+                                    <span class="icon icon-sm mr-3 mt-2"><i class="fas fa-arrow-alt-circle-right"></i></span>
+                                    <div>24/7 Chat and Video Consultation: Get immediate access to a veterinarian via chat or video call, any time of day or night. Our certified veterinarians are available to answer any questions you may have about your animal's health and provide customized treatment plan</div>
+                                </div>
+                            </li>
+                            <li class="py-3 lead">
+                                <div class="media">
+                                    <span class="icon icon-sm mr-3 mt-2"><i class="fas fa-arrow-alt-circle-right"></i></span>
+                                    <div>Home Consultation: Schedule a visit from one of our veterinarians at the comfort of your own home. Our veterinarians will come to you and perform a thorough examination of your pet or livestock, provide treatment, and give you recommendations for follow-up care.</div>
+                                </div>
+                            </li>
+                            <li class="py-3 lead">
+                                <div class="media">
+                                    <span class="icon icon-sm mr-3 mt-2"><i class="fas fa-arrow-alt-circle-right"></i></span>
+                                    <div>Diagnostic Lab Directory: Find the nearest diagnostic lab for your pet's needs. Our directory is updated regularly and includes a variety of options for different types of tests.</div>
+                                </div>
+                            </li>
+
+                            <li class="py-3 lead">
+                                <div class="media">
+                                    <span class="icon icon-sm mr-3 mt-2"><i class="fas fa-arrow-alt-circle-right"></i></span>
+                                    <div>Vaccination Tracker: Keep track of your pet's or livestock vaccinations and ensure they stay up-to-date. Our vaccination tracker allows you to easily see when your pet's next vaccinations are due and sends reminders so you can take proper action.</div>
+                                </div>
+                            </li>
+                            <li class="py-3 lead">
+                                <div class="media">
+                                    <span class="icon icon-sm mr-3 mt-2"><i class="fas fa-arrow-alt-circle-right"></i></span>
+                                    <div>Blog: Read educational articles on pet health and wellness, written by our team of veterinarians. Our blog is updated regularly with new articles on a variety of topics, from common health concerns to tips for keeping your pet and livestock happy and healthy.
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+</main>
+
+
+{% endblock content %}
+
+
+{%block footer%}
+
+{% include '../includes/footer.html' %}
+{% endblock footer%}

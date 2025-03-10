@@ -1,0 +1,516 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock title %}
+
+ <!-- LOAD HEADER HERE -->
+ {% block header %}
+ {% include '../includes/header.html' %}
+{% endblock header %}
+{% block content %}
+
+        <main>
+           
+            <section class="section-header pb-11 pb-lg-13 bg-primary text-white">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-10 text-center">
+                            <h1 class="display-2 mb-3" id="app"> </h1>
+                            <p class="lead mb-5 px-lg-5"> GetVet is your trusted source for vet telehealth care services for your beloved pets and livestocks. Get your animal’s vet care needs anytime, anywhere. </p>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-10 text-center">
+                            <a href="{% url 'registerUser' %}">
+                            <button type="button" class="btn btn-secondary">
+                                <span class="mr-2"><i class="fas fa-hand-pointer"></i></span>  <span class="d-none d-md-inline">Get  started</span>
+                            </button>
+                            </a>
+                            {% comment %} 
+                            <a class="btn btn-white text-primary animate-up-2 ml-3" href="./dashboard/dashboard.html">Find Members</a>
+                            {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+                {% comment %} <div class="pattern bottom"></div> {% endcomment %}
+                 <!-- Load message -->
+                 {% include '../includes/alerts.html' %}
+            </section>
+            <div class="section pt-0">
+                <div class="container mt-n9 mt-lg-n12 z-2">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-10">
+                            <div class="position-relative">
+                                <button
+                                    type="button"
+                                    class="hotspot-popover bg-white"
+                                    style="top: 35%; left: 5%;"
+                                    data-container="body"
+                                    data-toggle="popover"
+                                    title="Menu"
+                                    data-content="Use this menu to find the majority of a platform's essential functions."
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="hotspot-popover bg-primary"
+                                    style="top: 55%; left: 35%;"
+                                    data-container="body"
+                                    data-toggle="popover"
+                                    title="Rank Tracker"
+                                    data-content="We track your desktop and mobile keyword rankings from any location and plot your full ranking history on a handy graph."
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="hotspot-popover bg-primary"
+                                    style="top: 10%; left: 80%;"
+                                    data-container="body"
+                                    data-toggle="popover"
+                                    title="Stats"
+                                    data-content="We track your desktop and mobile keyword rankings from any location and plot your full ranking history on a handy graph."
+                                ></button>
+                                <img class="shadow-box rounded" src="{% static './assets/img/petman.png' %}" alt="SaaS preview"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <section class="section section-lg pt-4 pb-6">
+                <div class="container">
+                    <div class="row mb-5 mb-lg-7">
+                        <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0 text-center">
+                            <div class="icon icon-shape icon-shape-primary rounded-circle"><span class="fas fa-headset"></span></div>
+                            <h5 class="mt-4 mb-3">24/7 Chat & Video call</h5>
+                            <p class="px-0 px-sm-4 px-lg-0">Get immediate access to a veterinarian via chat or video call, any time of day or night.</p>
+                            <a href="{% url 'registerUser' %}" class="btn btn-link text-primary">
+                                Learn more <span class="icon icon-xs ml-2"><span class="fas fa-arrow-right"></span></span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0 text-center">
+                            <div class="icon icon-shape icon-shape-primary rounded-circle"><span class="bi bi-house-check-fill"></span></div>
+                            <h5 class="mt-4 mb-3">Home Consultations</h5>
+                            <p class="px-0 px-sm-4 px-lg-0">Schedule a visit from one of our veterinarians at the comfort of your own home.</p>
+                            <a href="{% url 'registerUser' %}" class="btn btn-link text-primary">
+                                Learn more <span class="icon icon-xs ml-2"><span class="fas fa-arrow-right"></span></span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0 text-center">
+                            <div class="icon icon-shape icon-shape-primary rounded-circle"><span class="bi bi-hospital"></span></div>
+                            <h5 class="mt-4 mb-3">Diagnostic Lab Directory</h5>
+                            <p class="px-0 px-sm-4 px-lg-0">Find the nearest diagnostic lab for your pet's need including variety of options for different types of tests.</p>
+                            <a href="{% url 'registerUser' %}" class="btn btn-link text-primary">
+                                Learn more <span class="icon icon-xs ml-2"><span class="fas fa-arrow-right"></span></span>
+                            </a>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0 text-center">
+                            <div class="icon icon-shape icon-shape-primary rounded-circle"><span class="bi bi-capsule-pill"></span></div>
+                            <h5 class="mt-4 mb-3">Vaccination Tracker</h5>
+                            <p class="px-0 px-sm-4 px-lg-0">Keep track of your pet's vaccinations and ensure they stay up-to-date.</p>
+                            <a href="{% url 'registerUser' %}" class="btn btn-link text-primary">
+                                Learn more <span class="icon icon-xs ml-2"><span class="fas fa-arrow-right"></span></span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center mb-5 mb-lg-6">
+                        <div class="col-12 col-md-8 text-center"><h2 class="h1 font-weight-bolder mb-4">Getvet solutions</h2>
+                        <p class="lead">
+                            Chat, video call consultations, home consultations, diagnostic lab directory, and vaccination tracker.
+                        </p>
+                    </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-5">
+                            <div class="card border-light shadow-soft p-4">
+                                <div class="card-body">
+                                    <div class="icon icon-lg icon-gray mb-4"><span class="bi bi-person"></span></div>
+                                    <h4 class="mb-4">For Pet & Livestock Owners</h4>
+                                    <p>
+                                        As a pet owner or customer, you now have access to an all-in-one platform for managing the health and well-being of your pets. Our platform provides a range of features and tools that make it easy and convenient for you to care for your pets. Such as Appointment booking and vaccination tracking. 
+                                    </p>
+                                    
+                                    <a href="{% url 'registerUser' %}" class="btn btn-primary mt-3 animate-up-2">
+                                        Learn more<span class="icon icon-xs ml-2"><i class="fas fa-arrow-right"></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card border-light shadow-soft p-4">
+                                <div class="card-body">
+                                    <div class="icon icon-lg icon-gray mb-4"><span class="bi bi-person-hearts"></span></div>
+                                    <h4 class="mb-4">For Vet Members</h4>
+                                    <p>
+                                        As a veterinary member, you can now attend to your clients from the comfort of your own home through our platform. Our platform allows you to attend to chat, video ,and home calls giving you the opportunity to provide your expert advice to your clients from anywhere in the world.
+                                    </p>
+                                    
+                                    <a href="{% url 'registerMember' %}" class="btn btn-primary mt-3 animate-up-2">
+                                        Learn more<span class="icon icon-xs ml-2"><i class="fas fa-arrow-right"></i></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-lg pt-0 line-bottom-light">
+                <div class="container">
+                    <div class="row justify-content-center mb-5 mb-lg-6">
+                        <div class="col-12 col-md-8 text-center">
+                            <h1 class="display-3 mb-4">How It works</h1>
+                            <p class="lead">GetVet is easy to setup and start consultation or booking of appointments.</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="timeline timeline-six px-3 px-lg-0">
+                            <div class="row no-gutters">
+                                <div class="col-lg"></div>
+                                <div class="col-lg-1 text-center flex-column d-none d-lg-flex">
+                                    <div class="row h-50">
+                                        <div class="col">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                    <span class="d-none d-lg-block m-4 h4 lh-200 dot-separator bg-soft shadow-soft border border-light text-primary">1</span>
+                                    <div class="row h-50">
+                                        <div class="col">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg py-2">
+                                    <div class="card timeline-card bg-soft shadow-soft border-light p-3">
+                                        <div class="card-body p-4">
+                                            <h4 class="mb-3"><span class="d-lg-none">1.</span> Create an account</h4>
+                                            <p class="my-2">Once you're approved, you can then explore our platform functionalities and make your first appointment.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-lg py-2">
+                                    <div class="card left-timeline-card bg-soft shadow-soft border-light p-3">
+                                        <div class="card-body p-4">
+                                            <h4 class="mb-3"><span class="d-lg-none">2.</span> Find Member </h4>
+                                            <p class="my-2">To book appointments,you’ll need to find and and choose a vet member who specialze in your pet or livestock.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-1 text-center flex-column d-none d-lg-flex">
+                                    <div class="row h-50">
+                                        <div class="col middle-line">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                    <span class="m-4 h4 lh-200 dot-separator bg-soft shadow-soft border border-light text-primary">2</span>
+                                    <div class="row h-50">
+                                        <div class="col middle-line">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg"></div>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-lg"></div>
+                                <div class="col-lg-1 text-center flex-column d-none d-lg-flex">
+                                    <div class="row h-50">
+                                        <div class="col middle-line">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                    <span class="m-4 h4 lh-200 dot-separator bg-soft shadow-soft border border-light text-primary">3</span>
+                                    <div class="row h-50">
+                                        <div class="col middle-line">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg py-2">
+                                    <div class="card timeline-card bg-soft shadow-soft border-light p-3">
+                                        <div class="card-body p-4">
+                                            <h4 class="mb-3"><span class="d-lg-none">3.</span> Book Appointment</h4>
+                                            <p class="my-2">You can now send your request to start a consultation service. We’ll review the information, and the member will be notified accordingly</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-lg py-2">
+                                    <div class="card left-timeline-card bg-soft shadow-soft border-light p-3">
+                                        <div class="card-body p-4">
+                                            <h4 class="mb-3"><span class="d-lg-none">4.</span> Connect</h4>
+                                            <p class="my-2">Start your chart, video or home visit call immediately. You can aslo track your pets or livestocks vaccinations</p>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-1 text-center flex-column d-none d-lg-flex">
+                                    <div class="row h-50">
+                                        <div class="col middle-line">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                    <span class="m-4 h4 lh-200 dot-separator bg-soft shadow-soft border border-light text-primary">4</span>
+                                    <div class="row h-50">
+                                        <div class="col">&nbsp;</div>
+                                        <div class="col">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <div class="col-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-lg pt-7 pt-lg-11 bg-primary text-white">
+                <div class="pattern top"></div>
+                <div class="container">
+                    <div class="row justify-content-center align-items-center mb-5 mb-xl-6">
+                        <div class="col-12 col-md-8 text-center">
+                            <h2 class="h1 mb-4">GetVet in figures</h2>
+                            <p class="lead">We aim to provide our clients with the best consultation services, which is now used by over 3 Thousand medical specialists nationwide.</p>
+                        </div>
+                    </div>
+                    <div class="row justify-content-between">
+                        <div class="col-6 col-xl-2 mb-5">
+                            <div class="d-flex flex-column align-items-center flex-lg-row justify-content-center">
+                                <div class="font-large font-weight-bold text-secondary">7</div>
+                                <div class="d-block ml-lg-3"><span class="h4 font-weight-normal d-lg-block">thousand</span> <span class="h4 font-weight-normal">appointments</span></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-2 mb-5">
+                            <div class="d-flex flex-column align-items-center flex-lg-row justify-content-center">
+                                <div class="font-large font-weight-bold text-secondary">5</div>
+                                <div class="d-block ml-lg-3"><span class="h4 font-weight-normal d-lg-block">thousand</span> <span class="h4 font-weight-normal">customers</span></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-2 mb-5">
+                            <div class="d-flex flex-column align-items-center flex-lg-row justify-content-center">
+                                <div class="font-large font-weight-bold text-secondary">36</div>
+                                <div class="d-block ml-lg-3"><span class="h4 font-weight-normal d-lg-block">geo</span> <span class="h4 font-weight-normal">locations</span></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-2 mb-5">
+                            <div class="d-flex flex-column align-items-center flex-lg-row justify-content-center">
+                                <div class="font-large font-weight-bold text-secondary">3</div>
+                                <div class="d-block ml-lg-3"><span class="h4 font-weight-normal d-lg-block">thousand</span> <span class="h4 font-weight-normal">members</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="section section-lg pb-9 pb-md-11 bg-soft">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-8 text-center">
+                            <h2 class="h1">Easy and convenient way to manage your clients.</h2>
+                            <p> Join our platform today and experience the convenience and flexibility of attending to your clients from anywhere, at any time!    </p>
+                            <a href="{% url 'registerMember' %}" class="btn btn-primary animate-up-2 mt-3 mb-4 mb-lg-0"><i class="far fa-user  mr-2"></i> I'm a Member</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="pattern bottom"></div>
+            </section>
+            
+            {% comment %} <div class="section section-sm line-bottom-light">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 text-gray text-center">
+                            <a href="#" class="icon icon-xl mr-3 mr-sm-5"><span class="fab fa-stripe"></span> </a><a href="#" class="icon icon-xl mr-3 mr-sm-5"><span class="fab fa-digg"></span> </a>
+                            <a href="#" class="icon icon-xl mr-3 mr-sm-5"><span class="fab fa-fedex"></span> </a><a href="#" class="icon icon-xl mr-3 mr-sm-5"><span class="fab fa-ember"></span> </a>
+                            <a href="#" class="icon icon-xl mr-3 mr-sm-5"><span class="fab fa-d-and-d-beyond"></span> </a><a href="#" class="icon icon-xl"><span class="fab fa-angrycreative"></span></a>
+                        </div>
+                    </div>
+                </div>
+            </div> {% endcomment %}
+            <section class="section">
+                <div class="container">
+                    <div class="row justify-content-center mb-5 mb-lg-7">
+                        <div class="col-12 col-md-8 text-center">
+                            <h1 class="h1 font-weight-bolder mb-4">Recommended by leading experts in the industry</h1>
+                            <p class="lead">Our consultation services are loved by users nationwide</p>
+                        </div>
+                    </div>
+                    <div class="row mb-lg-5">
+                        <div class="col-12 col-lg-6">
+                            <div class="customer-testimonial d-flex mb-5">
+                                <img src="{% static './assets/img/default_profile_pic.png'%}" class="image image-sm mr-3 rounded-circle shadow" alt="" />
+                                <div class="content-wrapper bg-soft shadow-soft border border-light rounded position-relative p-4">
+                                    <div class="d-flex mb-4">
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                    </div>
+                                    <p class="mt-2">
+                                        "I was so impressed with the convenience and quality of care I received from the veterinary member on this platform. My pet was able to receive expert care from the comfort of our home, and I was able to save time and money by avoiding a trip to the physical clinic. I highly recommend this platform to any pet owner looking for top-notch veterinary care."
+                                    </p>
+                                    <span class="h6">- James Musa <small class="ml-0 ml-md-2">Pet Owner</small></span>
+                                </div>
+                            </div>
+                            <div class="customer-testimonial d-flex mb-5">
+                                <img src="{% static './assets/img/default_profile_pic.png'%}" class="image image-sm mr-3 rounded-circle shadow" alt="" />
+                                <div class="content-wrapper bg-soft shadow-soft border border-light rounded position-relative p-4">
+                                    <div class="d-flex mb-4">
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                    </div>
+                                    <p class="mt-2">
+                                        "As a veterinary member, I was skeptical about using this platform at first, but I have to say that I am now a huge fan! The platform is easy to use, and the clients I have interacted with have been top-notch. The ability to attend to clients from the comfort of my own home has been a game-changer for me, and I would highly recommend this platform to any veterinary member looking for a flexible and convenient way to practice."
+                                    </p>
+                                    <span class="h6">- Richard Thomas <small class="ml-0 ml-md-2">Veterinary Member</small></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 pt-lg-6">
+                            <div class="customer-testimonial d-flex mb-5">
+                                <img src="{% static './assets/img/default_profile_pic.png'%}" class="image image-sm mr-3 rounded-circle shadow" alt="" />
+                                <div class="content-wrapper bg-soft shadow-soft border border-light rounded position-relative p-4">
+                                    <div class="d-flex mb-4">
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                    </div>
+                                    <p class="mt-2">
+                                        "I was a bit nervous about having a virtual appointment for my pet, but the veterinary member put me at ease and provided top-notch care. I was impressed with the level of knowledge and expertise that was available to me through this platform, and I would definitely use it again in the future."
+                                    </p>
+                                    <span class="h6">- Sarah Johnson <small class="ml-0 ml-md-2">Pet Owner</small></span>
+                                </div>
+                            </div>
+                            <div class="customer-testimonial d-flex mb-5">
+                                <img src="{% static './assets/img/default_profile_pic.png'%}" class="image image-sm mr-3 rounded-circle shadow" alt="" />
+                                <div class="content-wrapper bg-soft shadow-soft border border-light rounded position-relative p-4">
+                                    <div class="d-flex mb-4">
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span> <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                        <span class="text-warning mr-2"><i class="star fas fa-star"></i></span>
+                                    </div>
+                                    <p class="mt-2">
+                                        "As a busy veterinary member, I was looking for a way to increase my patient volume and reach a wider audience. This platform has been a game-changer for me! I have been able to connect with new clients and provide them with the care and support they need, all from the comfort of my own home. I would highly recommend this platform to any veterinary member looking to grow their practice."
+                                    </p>
+                                    <span class="h6">- Dr. Mary Brown <small class="ml-0 ml-md-2">Veterinary Member</small></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% comment %} <div class="row">
+                        <div class="col text-center">
+                            <a href="./testimonials.html" class="btn btn-primary animate-up-2">
+                                <span class="mr-2"><i class="fas fa-book-open"></i></span> See all stories
+                            </a>
+                        </div>
+                    </div> {% endcomment %}
+                </div>
+            </section>
+            <section class="section section-lg pb-5 bg-soft">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 text-center mb-3">
+                            <h2 class="mb-4">Join our platform today and take control of the health and well-being of your pets!</h2>
+                            {% comment %}
+                            <p class="lead mb-5">Join over <span class="font-weight-bolder">1,000+</span> users</p>
+                             
+                            <a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-mailchimp"></span> </a><a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-cpanel"></span> </a>
+                            <a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-dhl"></span> </a><a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-github-alt"></span> </a>
+                            <a href="#" class="icon icon-lg text-gray mr-3"><span class="fab fa-aws"></span> </a><a href="#" class="icon icon-lg text-gray"><span class="fab fa-node"></span></a>
+                            {% endcomment %}
+                        </div>
+                        <div class="col-12 text-center">
+                        <a href="{% url 'registerUser' %}">
+                            <button type="button" class="btn btn-secondary animate-up-2">
+                                <span class="mr-2"><i class="fas fa-hand-pointer"></i></span>Get started now
+                            </button>
+                        </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="section section-md bg-white">
+                <div class="container">
+                    <div class="row">
+                        <div class="col text-center"><h2 class="h4 mb-4">Frequently Asked Questions</h2></div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">What is veterinary telemedicine?</h5>
+                                    <p class="text-gray mb-4">
+                                        Veterinary telemedicine is the use of technology to provide veterinary care remotely. It allows pet and livestock owners to access expert care for their furry companions from the
+                                        comfort of their own home.</p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12 col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">What services does GetVet offer?</h5>
+                                    <p class="text-gray mb-4">
+                                        GetVet offers a range of services, including 24/7 chat and video call consultations, home consultations, a diagnostic lab directory, and a vaccination tracker. We also have a blog
+                                        where we provide educational articles.</p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">Who are the veterinarians that provide the consultations?</h5>
+                                    <p class="text-gray mb-4">
+                                        Our team of veterinarians are experienced and qualified to provide expert advice and
+                                        guidance for your pet's or livestock's health concerns. They are available for you 24/7.
+                                    </p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">Can I get a prescription for medication through GetVet?</h5>
+                                    <p class="text-gray mb-4">
+                                        Yes, our veterinarians can provide prescriptions for medication through a telemedicine consultation. However, it's important to note that some medications may require an inperson examination before a prescription can be written.</p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12 col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">What if I need to see a veterinarian in person?</h5>
+                                    <p class="text-gray mb-4">
+                                        If our veterinarians determine that an in-person examination is necessary, they will refer you to opt for our home consultation services to provide you with the best possible care for your furry companions or visit a local veterinarian or veterinary clinic service.
+                                        </p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12 col-lg-4 mb-3">
+                            <a href="./support-topic.html" class="card border-light animate-up-3 shadow-soft p-0 p-lg-4">
+                                <div class="card-body">
+                                    <h5 class="mb-4">How much does it cost to use GetVet’s services?and how can i pay</h5>
+                                    <p class="text-gray mb-4">The cost of our services varies depending on the service you choose. You can find more information about pricing on our website. We accept various payments methods, including credit card, Paystack, and bank transfer.
+                                    </p>
+                                    
+                                </div>
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <div class="col text-center mt-5">
+                        <a href="{% url 'faq' %}" class="btn btn-primary animate-up-2">
+                            <span class="mr-2"><i class="fas fa-book-open"></i></span> See all Questions
+                        </a>
+                    </div>
+                </div>
+                </div>
+            </section>
+          
+        </main>
+       
+{% endblock content %}
+
+
+{%block footer%}
+
+{% include '../includes/footer.html' %}
+{% endblock footer%}

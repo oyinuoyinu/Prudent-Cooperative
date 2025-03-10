@@ -1,0 +1,93 @@
+
+{% load widget_tweaks %}
+
+<div class="row g-3">
+    {% if form.non_field_errors %}
+    <div class="col-12">
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Member Status -->
+    <div class="col-12">
+        <div class="card bg-gray-50">
+            <div class="card-body">
+                <h6 class="card-title">Member Status</h6>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {% render_field form.is_active class="form-check-input" %}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                Active Member
+                            </label>
+                        </div>
+                        {% if form.is_active.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.is_active.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            {% render_field form.blacklisted class="form-check-input" %}
+                            <label class="form-check-label" for="{{ form.blacklisted.id_for_label }}">
+                                Blacklisted
+                            </label>
+                        </div>
+                        {% if form.blacklisted.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.blacklisted.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blacklist Reason -->
+    <div class="col-12 blacklist-reason" style="display: none;">
+        <label class="form-label">Blacklist Reason</label>
+        {% render_field form.blacklist_reason class="form-control" rows="3" placeholder="Enter reason for blacklisting..." %}
+        {% if form.blacklist_reason.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.blacklist_reason.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted">
+            Please provide a detailed reason for blacklisting this member.
+        </small>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function toggleBlacklistReason() {
+        if ($('#id_blacklisted').is(':checked')) {
+            $('.blacklist-reason').slideDown();
+            $('#id_blacklist_reason').prop('required', true);
+        } else {
+            $('.blacklist-reason').slideUp();
+            $('#id_blacklist_reason').prop('required', false);
+        }
+    }
+
+    // Initial state
+    toggleBlacklistReason();
+
+    // On blacklist checkbox change
+    $('#id_blacklisted').on('change', function() {
+        toggleBlacklistReason();
+    });
+});
+</script>

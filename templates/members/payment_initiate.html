@@ -1,0 +1,159 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Membership Payment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Application Details</h5>
+                        <p>Application Number: {{ application.application_number }}</p>
+                        <p>Amount to Pay: ₦{{ amount|floatformat:2 }}</p>
+                    </div>
+
+                    <div id="errorMessage" class="alert alert-danger d-none"></div>
+
+                    <div class="text-center">
+                        <button id="paymentButton" class="btn btn-primary btn-lg">
+                            Pay with Paystack
+                        </button>
+                    </div>
+                    <div><button type="button" onclick="payWithMonnify()">Pay With Monnify</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<!-- <script>
+function payWithMonnify() {
+
+    MonnifySDK.initialize({
+      amount: 100,
+      currency: "NGN",
+      reference: new String(new Date().getTime()),
+      customerFullName: "Damilare Ogunnaike",
+      customerEmail: "ogunnaike.damilare@gmail.com",
+      apiKey: "MK_TEST_FA25GM45T3",
+      contractCode: "626609763141",
+      paymentDescription: "Lahray World",
+      metadata: {
+        name: "Damilare",
+        age: 45,
+      },
+
+      onLoadStart: () => {
+        console.log("loading has started")
+      },
+      onLoadComplete: () => {
+        console.log("SDK is UP")
+      },
+      onComplete: function (response) {
+        //Implement what happens when the transaction is completed.
+        console.log(response)
+      },
+      onClose: function (data) {
+        //Implement what should happen when the modal is closed here
+        console.log(data)
+      },
+    })
+  }
+</script>
+<script src="https://sandbox.monnify.com/monnify.js"></script> -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentButton = document.getElementById('paymentButton');
+    const errorMessage = document.getElementById('errorMessage');
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove('d-none');
+        paymentButton.disabled = false;
+        paymentButton.textContent = 'Pay with Paystack';
+    }
+
+    if (paymentButton) {
+        paymentButton.addEventListener('click', async function(e) {
+            e.preventDefault();
+
+            try {
+                // Disable button and show loading state
+                paymentButton.disabled = true;
+                paymentButton.textContent = 'Initializing Payment...';
+                errorMessage.classList.add('d-none');
+
+                // Get CSRF token
+                const csrftoken = getCookie('csrftoken');
+
+                // Initialize payment
+                const response = await fetch("{% url 'members:payment_initiate' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Payment initialization failed');
+                }
+
+                if (!data.status || data.status !== 'success') {
+                    throw new Error('Invalid response from server');
+                }
+
+                // Initialize Paystack
+                const handler = PaystackPop.setup({
+                    key: '{{ PAYSTACK_PUBLIC_KEY }}',
+                    email: '{{ email }}',
+                    amount: {{ amount }} * 100,
+                    currency: 'NGN',
+                    ref: data.reference,
+                    metadata: {
+                        application_id: '{{ application.id }}',
+                        user_id: '{{ user.id }}',
+                        application_number: '{{ application.application_number }}'
+                    },
+                    callback: function(response) {
+                        window.location.href = "{% url 'members:payment_callback' %}?reference=" + response.reference;
+                    },
+                    onClose: function() {
+                        paymentButton.disabled = false;
+                        paymentButton.textContent = 'Pay with Paystack';
+                    }
+                });
+
+                handler.openIframe();
+            } catch (error) {
+                showError(error.message || 'Error initializing payment. Please try again.');
+            }
+        });
+    }
+});
+</script>
+{% endblock extra_js %}
+{% endblock %}

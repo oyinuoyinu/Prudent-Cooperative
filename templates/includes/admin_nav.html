@@ -1,0 +1,133 @@
+{% load static %}
+
+<nav id="sidebarMenu" class="sidebar d-md-block bg-primary text-white collapse px-4">
+    <div class="sidebar-sticky pt-4 mx-auto">
+        <div class="user-card d-flex align-items-center justify-content-between justify-content-md-center pb-4">
+            <div class="d-flex align-items-center">
+                {% if user_profile.profile_picture %}
+                <div class="user-avatar lg-avatar mr-4"><img src="{{user_profile.profile_picture_thumbnail.url}}" class="card-img-top rounded-circle border-white" alt="Profile Pic" /></div>
+                {%else%}
+                <div class="user-avatar lg-avatar mr-4"><img src="{% static './assets/img/default_profile_pic.png' %}" class="card-img-top rounded-circle border-white" alt="Bonnie Green" /></div>
+                {%endif%}
+                <div class="d-block">
+                    {%if user.is_authenticated%}
+                    <h2 class="h6">Hi, {{ user.first_name }}</h2>
+                    <a href="{% url 'logout' %}" class="btn btn-secondary btn-xs">
+                        <span class="mr-2"><span class="fas fa-sign-out-alt"></span></span>Sign Out
+                    </a>
+                    {%endif%}
+                </div>
+            </div>
+            <div class="collapse-close d-md-none">
+                <a href="#sidebarMenu" class="fas fa-times" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation"></a>
+            </div>
+        </div>
+        <style>
+            .nav-link, .sidebar-icon {
+                color: white !important;
+            }
+            .nav-link:hover, .nav-item.active .nav-link {
+                color: black !important;
+                background-color: white !important;
+            }
+            .nav-link:hover .sidebar-icon, .nav-item.active .nav-link .sidebar-icon {
+                color: black !important;
+            }
+            .user-card h2, .user-card a {
+                color: white !important;
+            }
+        </style>
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item active">
+                <a href="{% url 'members:adminDashboard' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-tachometer-alt"></span></span> <span>Dashboard</span>
+                </a>
+            </li>
+
+            <li class="nav-item {% if section == 'profile' %} active {%endif%}">
+                <a href="{% url 'admin_profile' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-user-shield"></span></span> <span>Admin Profile</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'savings:admin_transaction_list' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-piggy-bank"></span></span> <span>Savings</span>
+                </a>
+            </li>
+
+            <!-- <li class="nav-item {% if section == 'animals' %} active {%endif%}">
+                <a href="#" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-money-bill-wave"></span></span> <span>Loans</span>
+                </a>
+            </li> -->
+            <li class="nav-item dropdown {% if section == 'loans' %} active {%endif%}">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="outline: none;">
+                    <span class="sidebar-icon"><span class="fas fa-money-bill-wave"></span></span> <span>Loans</span>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'loans:admin_loan_list' %}">Loans</a>
+                    <a class="dropdown-item" href="{% url 'loans:admin_loan_application_list' %}">Applications</a>
+                    <a class="dropdown-item" href="{% url 'loans:admin_loan_transaction_list' %}">Transactions</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown {% if section == 'members' %} active {%endif%}">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="outline: none;">
+                    <span class="sidebar-icon"><span class="fas fa-users"></span></span> <span>Membership</span>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'members:admin_member_list' %}">Members</a>
+                    <a class="dropdown-item" href="{% url 'members:admin_application_list' %}">Members Application</a>
+                </div>
+            </li>
+
+            <li class="nav-item {% if section == 'payments' %} active {%endif%}">
+                <a href="{% url 'mono:mono_connect' %}" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-credit-card"></span></span> <span>Mono Connect</span>
+                </a>
+            </li>
+            <li class="nav-item {% if section == 'payments' %} active {%endif%}">
+                <a href="#" class="nav-link">
+                    <span class="sidebar-icon"><span class="fas fa-file-invoice-dollar"></span></span> <span>Account statement</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<style>
+     .nav-link, .sidebar-icon {
+        color: white !important;
+        background-color: transparent !important;
+    }
+    .nav-link:hover, .nav-item.active .nav-link {
+        color: black !important;
+        background-color: white !important;
+        cursor: pointer;
+    }
+     .nav-link:hover .sidebar-icon, .nav-item.active .nav-link .sidebar-icon {
+                color: black !important;
+            }
+            .user-card h2, .user-card a {
+                color: white !important;
+            }
+            .nav-item.pending-approval {
+                display: none;
+            }
+            .dropdown-item:hover {
+                background-color: transparent !important;
+            }
+            .nav-link:focus,
+            .dropdown-toggle:focus {
+                outline: none !important;
+                box-shadow: none !important;
+                background-color: transparent !important;
+            }
+            /* Ensure clean state after interaction */
+            .nav-link:not(:hover):not(.active),
+            .dropdown-toggle:not(:hover):not(.active) {
+                background-color: transparent !important;
+            }
+</style>

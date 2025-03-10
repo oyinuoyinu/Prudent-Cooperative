@@ -1,0 +1,114 @@
+{% load widget_tweaks %}
+
+<div class="row g-3">
+    {% if form.non_field_errors %}
+    <div class="col-12">
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Application Status -->
+    <div class="col-12">
+        <div class="card bg-gray-50">
+            <div class="card-body">
+                <h6 class="card-title">Application Status</h6>
+                <div class="row g-2">
+                    <div class="col-12">
+                        {% render_field form.status class="form-select" %}
+                        {% if form.status.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.status.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Verification -->
+    <div class="col-12">
+        <div class="card bg-gray-50">
+            <div class="card-body">
+                <h6 class="card-title">Payment Verification</h6>
+                <div class="row g-2">
+                    <div class="col-12">
+                        <div class="form-check">
+                            {% render_field form.payment_completed class="form-check-input" %}
+                            <label class="form-check-label" for="{{ form.payment_completed.id_for_label }}">
+                                Payment Verified
+                            </label>
+                        </div>
+                        {% if form.payment_completed.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.payment_completed.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Reason -->
+    <div class="col-12 rejection-reason" style="display: none;">
+        <label class="form-label">Rejection Reason</label>
+        {% render_field form.rejection_reason class="form-control" rows="3" placeholder="Enter reason for rejection..." %}
+        {% if form.rejection_reason.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.rejection_reason.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted">
+            Please provide a detailed reason for rejecting this application.
+        </small>
+    </div>
+
+    <!-- Review Notes -->
+    <div class="col-12">
+        <label class="form-label">Review Notes</label>
+        {% render_field form.review_notes class="form-control" rows="3" placeholder="Enter any additional notes..." %}
+        {% if form.review_notes.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.review_notes.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted">
+            Optional: Add any notes about this application review.
+        </small>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    function toggleRejectionReason() {
+        if ($('#id_status').val() === 'REJECTED') {
+            $('.rejection-reason').slideDown();
+            $('#id_rejection_reason').prop('required', true);
+        } else {
+            $('.rejection-reason').slideUp();
+            $('#id_rejection_reason').prop('required', false);
+        }
+    }
+
+    // Initial state
+    toggleRejectionReason();
+
+    // On status change
+    $('#id_status').on('change', function() {
+        toggleRejectionReason();
+    });
+});
+</script>

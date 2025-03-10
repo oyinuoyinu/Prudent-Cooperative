@@ -1,0 +1,272 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Member - {{ member.membership_number }}{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static 'assets/img/brand/light.svg' %}" alt="Logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'members:admin_member_list' %}">Members</a></li>
+                                <li class="breadcrumb-item active">{{ member.membership_number }}</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Member Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button type="button" class="btn btn-sm btn-primary edit-member"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editMemberModal"
+                                data-url="{% url 'members:admin_member_update' member.pk %}">
+                            <i class="fas fa-edit me-2"></i>Edit Member
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <!-- Member Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Member Information</h2>
+                                    </div>
+                                    <div class="col text-end">
+                                        {% if member.blacklisted %}
+                                            <span class="badge bg-danger">Blacklisted</span>
+                                        {% elif member.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Inactive</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Membership Number</h6>
+                                        <p class="mb-0">{{ member.membership_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Join Date</h6>
+                                        <p class="mb-0">{{ member.join_date|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Full Name</h6>
+                                        <p class="mb-0">{{ member.user.get_full_name }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Email</h6>
+                                        <p class="mb-0">{{ member.user.email }}</p>
+                                    </div>
+                                    {% if member.blacklisted %}
+                                    <div class="col-12">
+                                        <h6 class="text-muted mb-2">Blacklist Reason</h6>
+                                        <p class="mb-0">{{ member.blacklist_reason }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Application Information -->
+                        {% if member.application %}
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Application Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application Number</h6>
+                                        <p class="mb-0">{{ member.application.application_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application Date</h6>
+                                        <p class="mb-0">{{ member.application.application_date|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Phone Number</h6>
+                                        <p class="mb-0">{{ member.application.phone_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">State of Residence</h6>
+                                        <p class="mb-0">{{ member.application.state_of_residence }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Profession</h6>
+                                        <p class="mb-0">{{ member.application.profession }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Savings Type</h6>
+                                        <p class="mb-0">{{ member.application.get_savings_type_display }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <!-- Bank Account Information -->
+                        {% if member.user.mono_account %}
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Bank Account Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Bank Name</h6>
+                                    <p class="mb-0">{{ member.user.mono_account.bank_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Account Type</h6>
+                                    <p class="mb-0">{{ member.user.mono_account.account_type }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Account Status</h6>
+                                    <span class="badge bg-{{ member.user.mono_account.is_active|yesno:'success,danger' }}">
+                                        {{ member.user.mono_account.is_active|yesno:'Active,Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Next of Kin Information -->
+                        {% if member.application %}
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Next of Kin Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Name</h6>
+                                    <p class="mb-0">{{ member.application.next_of_kin_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Relationship</h6>
+                                    <p class="mb-0">{{ member.application.next_of_kin_relationship }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Phone Number</h6>
+                                    <p class="mb-0">{{ member.application.next_of_kin_phone }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editMemberForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Load edit member form
+    $('.edit-member').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editMemberForm').attr('action', url);
+            $('#editMemberModal .modal-body').html(data);
+        });
+    });
+
+    // Edit member form submission
+    $('#editMemberForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

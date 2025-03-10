@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Loan Application - {{ application.id }}{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static 'assets/img/brand/light.svg' %}" alt="Logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'loans:admin_loan_application_list' %}">Applications</a></li>
+                                <li class="breadcrumb-item active">{{ application.id }}</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Loan Application Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% if application.status == 'pending' %}
+                        <button type="button" class="btn btn-sm btn-primary edit-application"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editApplicationModal"
+                                data-url="{% url 'loans:admin_loan_update' application.pk %}">
+                            <i class="fas fa-edit me-2"></i>Review Application
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <!-- Application Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Application Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application ID</h6>
+                                        <p class="mb-0">{{ application.id }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application Date</h6>
+                                        <p class="mb-0">{{ application.created_at|date:"M d, Y H:i" }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Loan Amount</h6>
+                                        <p class="mb-0 fw-bold">₦{{ application.loan_amount|floatformat:2|intcomma }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Loan Plan</h6>
+                                        <p class="mb-0">{{ application.loan_plan.name }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Tenure</h6>
+                                        <p class="mb-0">{{ application.tenure.duration }} months</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Status</h6>
+                                        <span class="badge bg-{% if application.status == 'approved' %}success{% elif application.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="col-12 mb-4">
+                                        <h6 class="text-muted mb-2">Purpose of Loan</h6>
+                                        <p class="mb-0">{{ application.purpose }}</p>
+                                    </div>
+                                    {% if application.review_notes %}
+                                    <div class="col-12">
+                                        <h6 class="text-muted mb-2">Review Notes</h6>
+                                        <p class="mb-0">{{ application.review_notes }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guarantor Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Guarantor Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% for guarantor in guarantors %}
+                                <div class="row {% if not forloop.last %}mb-4 border-bottom pb-4{% endif %}">
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted mb-2">Full Name</h6>
+                                        <p class="mb-0">{{ guarantor.full_name }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted mb-2">Relationship</h6>
+                                        <p class="mb-0">{{ guarantor.relationship }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted mb-2">Phone Number</h6>
+                                        <p class="mb-0">{{ guarantor.phone_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted mb-2">Email</h6>
+                                        <p class="mb-0">{{ guarantor.email }}</p>
+                                    </div>
+                                    <div class="col-12">
+                                        <h6 class="text-muted mb-2">Address</h6>
+                                        <p class="mb-0">{{ guarantor.address }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <p class="text-center mb-0">No guarantors found</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <!-- Applicant Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Applicant Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Full Name</h6>
+                                    <p class="mb-0">{{ application.user.get_full_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Email</h6>
+                                    <p class="mb-0">{{ application.user.email }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Phone Number</h6>
+                                    <p class="mb-0">{{ application.user.phone_number }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Member Since</h6>
+                                    <p class="mb-0">{{ application.user.date_joined|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account Information -->
+                        {% if application.user.mono_account %}
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Bank Account Information</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Bank Name</h6>
+                                    <p class="mb-0">{{ application.user.mono_account.bank_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Account Type</h6>
+                                    <p class="mb-0">{{ application.user.mono_account.account_type }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Account Status</h6>
+                                    <span class="badge bg-{{ application.user.mono_account.is_active|yesno:'success,danger' }}">
+                                        {{ application.user.mono_account.is_active|yesno:'Active,Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Supporting Documents -->
+                        {% if application.documents.exists %}
+                        <div class="card border-0 shadow">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Supporting Documents</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% for document in application.documents.all %}
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-2">{{ document.get_document_type_display }}</h6>
+                                    <a href="{{ document.file.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                        <i class="fas fa-download me-2"></i>View Document
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Application Modal -->
+<div class="modal fade" id="editApplicationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Review Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editApplicationForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Decision</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load edit application form
+    $('.edit-application').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editApplicationForm').attr('action', url);
+            $('#editApplicationModal .modal-body').html(data);
+        });
+    });
+
+    // Edit application form submission
+    $('#editApplicationForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

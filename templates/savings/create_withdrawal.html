@@ -1,0 +1,79 @@
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}Create Withdrawal{% endblock title %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Pixel logo" />
+        <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}" alt="Pixel Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'memberDashboard' %}"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'savings:plans_list' %}">Savings</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'savings:plan_details' plan.pk %}">{{ plan.get_plan_type_display }}</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Make Withdrawal</li>
+                            </ol>
+                        </nav>
+                        <div class="mb-4">
+                            <a href="{% url 'savings:plan_details' plan.pk %}" class="text-decoration-none text-muted">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Savings Plan
+                            </a>
+                        </div>
+                        <h2 class="h5">Make Withdrawal</h2>
+                    </div>
+                </div>
+
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-xl-8">
+                            <div class="card card-body border-0 shadow mb-4">
+                                <h2 class="h5 mb-4">Enter Details</h2>
+                                <form action="{% url 'savings:create_withdrawal' plan.pk %}" method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            {{ form.amount|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            {{ form.description|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button type="submit" class="btn btn-primary">Submit Withdrawal</button>
+                                        <a href="{% url 'savings:plan_details' plan.pk %}" class="btn btn-secondary"><span class="text-white">Cancel</span></a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

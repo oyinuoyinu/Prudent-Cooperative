@@ -1,0 +1,281 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Application - {{ application.application_number }}{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="#">
+        <img class="navbar-brand-dark" src="{% static 'assets/img/brand/light.svg' %}" alt="Logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include 'includes/alerts.html' %}
+            {% include 'includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'members:admin_application_list' %}">Applications</a></li>
+                                <li class="breadcrumb-item active">{{ application.application_number }}</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Application Details</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        {% if application.status == 'PENDING' %}
+                        <button type="button" class="btn btn-sm btn-primary edit-application"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editApplicationModal"
+                                data-url="{% url 'members:admin_application_update' application.pk %}">
+                            <i class="fas fa-edit me-2"></i>Review Application
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <!-- Application Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Application Information</h2>
+                                    </div>
+                                    <div class="col text-end">
+                                        <span class="badge bg-{% if application.status == 'APPROVED' %}success{% elif application.status == 'REJECTED' %}danger{% else %}warning{% endif %}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application Number</h6>
+                                        <p class="mb-0">{{ application.application_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Application Date</h6>
+                                        <p class="mb-0">{{ application.application_date|date:"M d, Y" }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Full Name</h6>
+                                        <p class="mb-0">{{ application.full_name }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Email</h6>
+                                        <p class="mb-0">{{ application.email }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Phone Number</h6>
+                                        <p class="mb-0">{{ application.phone_number }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">State of Residence</h6>
+                                        <p class="mb-0">{{ application.state_of_residence }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Profession</h6>
+                                        <p class="mb-0">{{ application.profession }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Savings Type</h6>
+                                        <p class="mb-0">{{ application.get_savings_type_display }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next of Kin Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <h2 class="fs-5 fw-bold mb-0">Next of Kin Information</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Name</h6>
+                                        <p class="mb-0">{{ application.next_of_kin_name }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Relationship</h6>
+                                        <p class="mb-0">{{ application.next_of_kin_relationship }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Phone Number</h6>
+                                        <p class="mb-0">{{ application.next_of_kin_phone }}</p>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <h6 class="text-muted mb-2">Address</h6>
+                                        <p class="mb-0">{{ application.next_of_kin_address }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <!-- Payment Information -->
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h2 class="fs-5 fw-bold mb-0">Payment Information</h2>
+                                    </div>
+                                    <div class="col text-end">
+                                        {% if application.payment_completed %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if application.payment_proof %}
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Payment Proof</h6>
+                                    <a href="{{ application.payment_proof.url }}" target="_blank" class="btn btn-sm btn-gray-100">
+                                        <i class="fas fa-file-alt me-2"></i>View Document
+                                    </a>
+                                </div>
+                                {% endif %}
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Payment Amount</h6>
+                                    <p class="mb-0">₦{{ application.payment_amount|intcomma }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Payment Date</h6>
+                                    <p class="mb-0">{{ application.payment_date|default:"-"|date:"M d, Y" }}</p>
+                                </div>
+                                {% if application.payment_verified_by %}
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Verified By</h6>
+                                    <p class="mb-0">{{ application.payment_verified_by.get_full_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Verification Date</h6>
+                                    <p class="mb-0">{{ application.payment_verified_date|date:"M d, Y" }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Review Information -->
+                        {% if application.status != 'PENDING' %}
+                        <div class="card border-0 shadow mb-4">
+                            <div class="card-header">
+                                <h2 class="fs-5 fw-bold mb-0">Review Information</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Reviewed By</h6>
+                                    <p class="mb-0">{{ application.reviewed_by.get_full_name }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Review Date</h6>
+                                    <p class="mb-0">{{ application.review_date|date:"M d, Y" }}</p>
+                                </div>
+                                {% if application.rejection_reason %}
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-2">Rejection Reason</h6>
+                                    <p class="mb-0">{{ application.rejection_reason }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Application Modal -->
+<div class="modal fade" id="editApplicationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Review Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editApplicationForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div id="editFormErrors" class="alert alert-danger d-none"></div>
+                    <!-- Form will be loaded here via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Decision</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Load edit application form
+    $('.edit-application').on('click', function() {
+        var url = $(this).data('url');
+        $.get(url, function(data) {
+            $('#editApplicationForm').attr('action', url);
+            $('#editApplicationModal .modal-body').html(data);
+        });
+    });
+
+    // Edit application form submission
+    $('#editApplicationForm').on('submit', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    $('#editFormErrors')
+                        .html(response.message)
+                        .removeClass('d-none');
+                }
+            },
+            error: function() {
+                $('#editFormErrors')
+                    .html('An error occurred. Please try again.')
+                    .removeClass('d-none');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

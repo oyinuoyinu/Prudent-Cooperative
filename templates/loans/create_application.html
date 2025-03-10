@@ -1,0 +1,166 @@
+
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block title %}Apply for Loan{% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'loans:plans_list' %}">Loans</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Apply for Loan</li>
+                            </ol>
+                        </nav>
+                        <!-- Back Arrow -->
+                        <div class="mb-4">
+                            <a href="{% url 'loans:plans_list' %}" class="text-decoration-none text-muted">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Loan Plans
+                            </a>
+                        </div>
+                        <h2 class="h4">Apply for {{ loan_plan.get_plan_type_display }}</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-xl-8">
+                        <div class="card card-body border-0 shadow mb-4">
+                            <h2 class="h5 mb-4">Loan Application Form</h2>
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Selected Plan Details</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p><strong>Plan Type:</strong> {{ loan_plan.get_plan_type_display }}</p>
+                                                        <p><strong>Interest Rate:</strong> {{ loan_plan.loan_tenure.interest_rate }}%</p>
+                                                        <p><strong>Tenure:</strong> {{ loan_plan.loan_tenure.months }} months</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p><strong>Min Amount:</strong> ₦{{ loan_plan.min_amount|intcomma }}</p>
+                                                        <p><strong>Max Amount:</strong> ₦{{ loan_plan.max_amount|intcomma }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        {{ form|crispy }}
+                                    </div>
+                                </div>
+
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">Guarantor Information</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                {{ guarantor_formset.management_form }}
+                                                {% for guarantor_form in guarantor_formset %}
+                                                <div class="guarantor-form mb-4">
+                                                    <h6 class="mb-3">Guarantor #{{ forloop.counter }}</h6>
+                                                    {{ guarantor_form|crispy }}
+                                                    {% if not forloop.last %}
+                                                    <hr class="my-4">
+                                                    {% endif %}
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                                    <a href="{% url 'loans:plans_list' %}" class="btn btn-secondary"><span class="text-white">Cancel</span></a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <div class="row">
+                            <!-- <div class="col-12">
+                                <div class="card card-body border-0 shadow mb-4">
+                                    <h2 class="h5 mb-4">Loan Requirements</h2>
+                                    <div class="alert alert-info">
+                                        {{ loan_plan.requirements|linebreaks }}
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="col-12">
+                                <div class="card card-body border-0 shadow">
+                                    <h2 class="h5 mb-4">Loan Requirements</h2>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <span class="fas fa-check-circle text-success me-2"></span>
+                                            Payment of N1,500 non-refundable application fee is required.
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="fas fa-check-circle text-success me-2"></span>
+                                            An applicant MUST have up to 30% of the amount she intends to get as a loan.
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="fas fa-check-circle text-success me-2"></span>
+                                            An applicant MUST have been a member for a period of NOT LESS THAN 6 MONTHS, and the member MUST have a good savings history.
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="fas fa-check-circle text-success me-2"></span>
+                                            An applicant is expected to produce a guarantor who is on grade level 12 and above in the Federal or State Civil Service.
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Add custom validation and dynamic form handling if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        const loanAmountInput = document.querySelector('input[name="loan_amount"]');
+        const minAmount = {{ loan_plan.min_amount }};
+        const maxAmount = {{ loan_plan.max_amount }};
+
+        loanAmountInput.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value < minAmount) {
+                this.setCustomValidity(`Amount must be at least ₦${minAmount.toLocaleString()}`);
+            } else if (value > maxAmount) {
+                this.setCustomValidity(`Amount cannot exceed ₦${maxAmount.toLocaleString()}`);
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock content %}

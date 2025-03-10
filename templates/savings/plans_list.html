@@ -1,0 +1,409 @@
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Member Dashboard{% endblock title %}
+
+
+{% block content %}
+
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="#">{% comment %}{% url 'home' %}{% endcomment %}
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Pixel logo" /> <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}"alt="Pixel Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft min-vh-100">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            <!-- Load the navbar here -->
+            {% include 'includes/member_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div class="d-block mb-4 mb-md-0">
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Savings</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h5">Saving Plans</h2>
+                    </div>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'savings:create_plan' %}" class="btn btn-sm btn-primary text-center text-white"><span class="fas fa-plus mr-1"></span> <span class="text-md-center">Create Savings Plan</span></a>
+
+                        <!-- Notification Bell Icon -->
+                        <div class="dropdown ml-3">
+                            <a class="dropdown-toggle" href="#" role="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="fas fa-bell mt-1" style="font-size: 20px;"></span>
+                                {% if latest_notifications.count > 0 %}
+                                <span class="badge badge-danger" style="border-radius: 100px; position: relative; bottom:10px; left: -5px;" id="notification-badge"> {{latest_notifications.count}}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notifications-dropdown">
+                                <!-- Notifications will be dynamically added here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    {% if savings_plans %}
+                    {% for plan in savings_plans %}
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    {% if plan.plan_type == 'Investment' %}
+                                        <div class="icon-shape bg-primary-soft text-primary rounded-circle">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                    {% elif plan.plan_type == 'Children' %}
+                                        <div class="icon-shape bg-success-soft text-success rounded-circle">
+                                            <i class="fas fa-child"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="icon-shape bg-info-soft text-info rounded-circle">
+                                            <i class="fas fa-piggy-bank"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="badge {% if plan.plan_type == 'Investment' %}bg-primary-soft text-primary
+                                                      {% elif plan.plan_type == 'Children' %}bg-success-soft text-success
+                                                      {% else %}bg-info-soft text-info{% endif %}">
+                                        {{plan.plan_type}}
+                                    </span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <h3 class="mb-0">₦{{plan.amount|floatformat:0|intcomma|default:"0"}}</h3>
+                                        <span class="badge bg-success-soft text-success ms-2">
+                                            <i class="fas fa-chart-line me-1"></i>{{plan.interest_rate}}%
+                                        </span>
+                                    </div>
+                                    <p class="text-muted mb-0">Available Balance</p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <!-- <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Duration</span>
+                                        <span class="fw-medium">{{plan.duration}} months</span>
+                                    </div> -->
+                                    {% if plan.maturity_date %}
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Maturity</span>
+                                        <span class="fw-medium">{{plan.maturity_date|date:"M d, Y"}}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-grid">
+                                    <a href="{% url 'savings:plan_details' plan.id %}"
+                                       class="btn btn-primary"><span class="text-white">
+                                        <i class="fas fa-eye me-2 text-white"></i>View Details</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="col-12 text-center py-5">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-5">
+                                <div class="mb-4">
+                                    <i class="fas fa-piggy-bank fa-3x text-muted"></i>
+                                </div>
+                                <h5 class="mb-3">Start Your Savings Journey</h5>
+                                <p class="text-muted mb-4">You haven't created any savings plans yet. Create one now to begin saving!</p>
+                                <a href="{% url 'savings:create_plan' %}" class="btn btn-primary text-white">
+                                    <i class="fas fa-plus me-2"></i>Create Savings Plan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h5 mb-0">
+                                <i class="fas fa-history text-primary me-2"></i>All Transaction History
+                            </h2>
+                            {% if pending_transactions > 0 %}
+                            <span class="badge bg-warning-soft text-warning">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ pending_transactions }} Pending
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th class="border-0 text-muted px-4">Date</th>
+                                                <th class="border-0 text-muted">Reference</th>
+                                                <th class="border-0 text-muted">Type</th>
+                                                <th class="border-0 text-muted">Amount</th>
+                                                <th class="border-0 text-muted">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for transaction in user_transactions %}
+                                            <tr>
+                                                <td class="px-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-shape icon-sm bg-light rounded-circle me-2">
+                                                            <i class="fas {% if transaction.transaction_type == 'deposit' %}fa-arrow-up text-success{% else %}fa-arrow-down text-danger{% endif %}"></i>
+                                                        </div>
+                                                        <span class="fw-medium">{{ transaction.transaction_date|date:"M d, Y" }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-muted">{{ transaction.reference_number }}</td>
+                                                <td>
+                                                    {% if transaction.transaction_type == 'deposit' %}
+                                                        <span class="badge bg-success-soft text-success">Deposit</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-soft text-danger">Withdrawal</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="fw-medium {% if transaction.transaction_type == 'deposit' %}text-success{% else %}text-danger{% endif %}">
+                                                    {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}₦{{ transaction.amount|floatformat:2|intcomma }}
+                                                </td>
+                                                <td>
+                                                    {% if transaction.status == 'pending' %}
+                                                        <span class="badge bg-warning-soft text-warning">
+                                                            <i class="fas fa-clock me-1"></i>Pending
+                                                        </span>
+                                                    {% elif transaction.status == 'approved' %}
+                                                        <span class="badge bg-success-soft text-success">
+                                                            <i class="fas fa-check me-1"></i>Approved
+                                                        </span>
+                                                    {% elif transaction.status == 'rejected' %}
+                                                        <span class="badge bg-danger-soft text-danger">
+                                                            <i class="fas fa-times me-1"></i>Rejected
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-5">
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                                        <p class="mb-0">No transactions found</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {% if user_transactions.paginator.num_pages > 1 %}
+                                <div class="px-4 py-3 border-top">
+                                    <nav>
+                                        <ul class="pagination mb-0 justify-content-center">
+                                            {% if user_transactions.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1">
+                                                    <i class="fas fa-angle-double-left"></i>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ user_transactions.previous_page_number }}">
+                                                    <i class="fas fa-angle-left"></i>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+
+                                            <!-- <li class="page-item active">
+                                                <span class="page-link">
+                                                    {{ user_transactions.number }} of {{ user_transactions.paginator.num_pages }}
+                                                </span>
+                                            </li> -->
+
+                                            {% if user_transactions.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ user_transactions.next_page_number }}">
+                                                    <i class="fas fa-angle-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ user_transactions.paginator.num_pages }}">
+                                                    <i class="fas fa-angle-double-right"></i>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    /* Additional styles for transaction table */
+                    .icon-sm {
+                        width: 32px;
+                        height: 32px;
+                    }
+
+                    .bg-warning-soft {
+                        background-color: rgba(255, 193, 7, 0.1);
+                    }
+
+                    .bg-danger-soft {
+                        background-color: rgba(220, 53, 69, 0.1);
+                    }
+
+                    .table > :not(caption) > * > * {
+                        padding: 1rem 0.75rem;
+                    }
+
+                    .table tbody tr {
+                        transition: background-color 0.2s;
+                    }
+
+                    .table tbody tr:hover {
+                        background-color: rgba(0, 0, 0, 0.02);
+                    }
+
+                    .page-link {
+                        width: 36px;
+                        height: 36px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0;
+                        margin: 0 3px;
+                        border-radius: 50% !important;
+                        font-size: 0.875rem;
+                        border: none;
+                    }
+
+                    .page-link:hover {
+                        background-color: var(--bs-primary);
+                        color: white;
+                    }
+
+                    .page-item.active .page-link {
+                        background-color: var(--bs-primary);
+                    }
+                </style>
+
+                <style>
+                    .icon-shape {
+                        width: 48px;
+                        height: 48px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .icon-shape i {
+                        font-size: 1.25rem;
+                    }
+                    .bg-primary-soft {
+                        background-color: rgba(13, 110, 253, 0.1);
+                    }
+                    .bg-success-soft {
+                        background-color: rgba(25, 135, 84, 0.1);
+                    }
+                    .bg-info-soft {
+                        background-color: rgba(13, 202, 240, 0.1);
+                    }
+                    .rounded-circle {
+                        border-radius: 50% !important;
+                    }
+                    .card {
+                        transition: transform 0.2s ease-in-out;
+                    }
+                    .card:hover {
+                        transform: translateY(-5px);
+                    }
+
+                    /* Button styles */
+                    .btn {
+                        display: inline-flex !important;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 0.5rem;
+                        padding: 0.75rem 1.5rem;
+                        font-weight: 500;
+                    }
+                    .btn i {
+                        font-size: 1rem;
+                    }
+                    .btn span {
+                        color: inherit;
+                        font-size: 0.9375rem;
+
+                    }
+                </style>
+
+            </main>
+        </div>
+    </div>
+</div>
+
+{% comment %} Channels Websocket Script {% endcomment %}
+
+{{ room_name|json_script:"room-name" }}
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        const notificationSocket = new WebSocket(
+            ws_scheme + '://'
+            + window.location.host
+            + '/ws/notification/'
+            + roomName
+            + '/'
+        );
+
+        notificationSocket.onmessage = function(e) {
+           const data = JSON.parse(e.data);
+            //document.querySelector('#chat-log').value += (data.message + '\n');
+            //const myValue = data.data.value
+            //const split_string = myValue.split(" ")
+            //console.log(split_string)
+            //console.log(typeof myValue)
+            const notifier= data.data.message
+            console.log(notifier)
+            //document.getElementById('price').innerText = myValue;
+            document.getElementById("notifications-dropdown").innerHTML = "<li class='dropdown-item'>" + notifier + "</li><hr class='dropdown-divider'>" + document.getElementById("notifications-dropdown").innerHTML;
+            document.getElementById("notification-badge").innerHTML = parseInt(document.getElementById("notification-badge").innerHTML) + 1;
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+
+    const bell = document.getElementById("notification-bell")
+    bell.addEventListener('click', function(event) {
+        if (document.getElementById("notification-badge").innerHTML != 0) {
+            // Reset the badge number
+            document.getElementById("notification-badge").innerHTML = 0;
+        }
+  });
+    </script>
+{% endblock content %}

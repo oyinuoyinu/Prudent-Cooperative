@@ -1,0 +1,438 @@
+{% extends '../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard{% endblock title %}
+
+{% block content %}
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include '../includes/alerts.html' %}
+            {% include '../includes/admin_nav.html' %}
+
+            <main class="content px-3 py-4">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent mb-2">
+                                <li class="breadcrumb-item">
+                                    <a href="#"><span class="fas fa-home"></span></a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="#">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Admin Dashboard</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4 mb-0">Admin Dashboard</h2>
+                    </div>
+                </div>
+                 <!-- Financial Statistics Section -->
+                 <div class="financial-stats-section py-4 px-3 mb-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-shape icon-sm bg-white text-primary rounded-circle me-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="mb-0 text-white">Financial Overview</h4>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="card bg-white bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center p-4">
+                                    <div class="icon-shape icon-lg bg-success text-white rounded-circle me-4">
+                                        <i class="fas fa-piggy-bank"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block h6 mb-2 text-white text-opacity-75">Total Savings</span>
+                                        <h3 class="mb-0 fw-extrabold text-white">₦{{ total_savings|floatformat:0|intcomma }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="card bg-white bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center p-4">
+                                    <div class="icon-shape icon-lg bg-primary text-white rounded-circle me-4">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block h6 mb-2 text-white text-opacity-75">Total Loans</span>
+                                        <h3 class="mb-0 fw-extrabold text-white">₦{{ total_loans|floatformat:0|intcomma }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="card bg-white bg-opacity-10 border-0 h-100">
+                                <div class="card-body d-flex align-items-center p-4">
+                                    <div class="icon-shape icon-lg bg-warning text-white rounded-circle me-4">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block h6 mb-2 text-white text-opacity-75">Outstanding Loans</span>
+                                        <h3 class="mb-0 fw-extrabold text-white">₦{{ loan_balance|floatformat:0|intcomma }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member Statistics Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center p-4">
+                                <div class="icon-shape icon-lg bg-primary-soft text-primary rounded-circle me-4">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block h6 mb-2 text-muted">Total Members</span>
+                                    <h3 class="mb-0 fw-extrabold">{{ total_members }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center p-4">
+                                <div class="icon-shape icon-lg bg-success-soft text-success rounded-circle me-4">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block h6 mb-2 text-muted">Active Members</span>
+                                    <h3 class="mb-0 fw-extrabold">{{ active_members }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-xl-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center p-4">
+                                <div class="icon-shape icon-lg bg-warning-soft text-warning rounded-circle me-4">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block h6 mb-2 text-muted">Pending Applications</span>
+                                    <h3 class="mb-0 fw-extrabold">{{ pending_applications }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Pending Actions Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-sm-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center p-4">
+                                <div class="icon-shape icon-lg bg-info-soft text-info rounded-circle me-4">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block h6 mb-2 text-muted">Pending Withdrawals</span>
+                                    <h3 class="mb-0 fw-extrabold">{{ pending_withdrawals }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center p-4">
+                                <div class="icon-shape icon-lg bg-danger-soft text-danger rounded-circle me-4">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block h6 mb-2 text-muted">Pending Loans</span>
+                                    <h3 class="mb-0 fw-extrabold">{{ pending_loans }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row g-4">
+                    <!-- Bar Chart -->
+                    <div class="col-12 col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0">Monthly Financial Overview</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <canvas id="monthlyOverviewChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Column -->
+                    <div class="col-12 col-lg-4">
+                        <div class="row g-4">
+                            <!-- Pie Chart -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-white py-3">
+                                        <h5 class="mb-0">Savings Distribution</h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <canvas id="savingsDistributionChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Donut Chart -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-white py-3">
+                                        <h5 class="mb-0">Loan Repayment Progress</h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <canvas id="loanProgressChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .content {
+                        min-height: 100vh;
+                        background-color: #f8f9fa;
+                    }
+                    .financial-stats-section {
+                        background: linear-gradient(45deg, #4158D0, #C850C0);
+                        border-radius: 1rem;
+                        margin-left: -1rem;
+                        margin-right: -1rem;
+                    }
+                    .financial-stats-section .card {
+                        position: relative;
+                        overflow: hidden;
+                        transition: all 0.3s ease;
+                    }
+                    .financial-stats-section .card::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        border-radius: 0.75rem;
+                        background: rgba(255, 255, 255, 0.1);
+                        transition: all 0.3s ease;
+                        opacity: 0;
+                    }
+                    .financial-stats-section .card:hover {
+                        transform: translateY(-5px) scale(1.02);
+                        box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+                    }
+                    .financial-stats-section .card:hover::before {
+                        opacity: 1;
+                    }
+                    .financial-stats-section .card-body {
+                        position: relative;
+                        z-index: 1;
+                    }
+                    .icon-shape {
+                        width: 64px;
+                        height: 64px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .icon-lg {
+                        width: 48px;
+                        height: 48px;
+                    }
+                    .icon-sm {
+                        width: 32px;
+                        height: 32px;
+                    }
+                    .bg-opacity-10 {
+                        --bs-bg-opacity: 0.1;
+                    }
+                    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+                    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+                    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+                    .bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
+                    .bg-danger-soft { background-color: rgba(220, 53, 69, 0.1); }
+                    .text-info { color: #0dcaf0 !important; }
+                    .text-danger { color: #dc3545 !important; }
+                    .fw-extrabold { font-weight: 800; }
+                    .card {
+                        transition: all 0.3s ease;
+                        border-radius: 0.75rem;
+                    }
+                    .card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                    }
+                    .financial-stats-section .card:hover {
+                        background-color: rgba(255, 255, 255, 0.15) !important;
+                    }
+                    .card-header {
+                        border-top-left-radius: 0.75rem !important;
+                        border-top-right-radius: 0.75rem !important;
+                    }
+                    @media (max-width: 768px) {
+                        .content {
+                            padding: 1rem !important;
+                        }
+                        .financial-stats-section {
+                            margin-left: -0.5rem;
+                            margin-right: -0.5rem;
+                            padding: 1.5rem !important;
+                        }
+                        .icon-shape {
+                            width: 48px;
+                            height: 48px;
+                        }
+                        .icon-lg {
+                            width: 36px;
+                            height: 36px;
+                        }
+                        .icon-sm {
+                            width: 28px;
+                            height: 28px;
+                        }
+                        h3 {
+                            font-size: 1.5rem;
+                        }
+                    }
+                </style>
+            </main>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+{{ block.super }}
+<script>
+// Get the data from Django context
+const monthlyLabels = {{ monthly_labels|safe }};
+const monthlySavings = {{ monthly_savings|safe }};
+const monthlyLoans = {{ monthly_loans|safe }};
+
+// Monthly Overview Bar Chart
+const monthlyOverviewCtx = document.getElementById('monthlyOverviewChart').getContext('2d');
+const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
+    type: 'bar',
+    data: {
+        labels: monthlyLabels,
+        datasets: [{
+            label: 'Savings',
+            data: monthlySavings,
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            borderColor: 'rgba(25, 135, 84, 1)',
+            borderWidth: 1
+        },
+        {
+            label: 'Loans',
+            data: monthlyLoans,
+            backgroundColor: 'rgba(13, 110, 253, 0.2)',
+            borderColor: 'rgba(13, 110, 253, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₦' + value.toLocaleString();
+                    }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Monthly Savings & Loans Overview'
+            }
+        }
+    }
+});
+
+// Savings Distribution Pie Chart
+const savingsDistributionCtx = document.getElementById('savingsDistributionChart').getContext('2d');
+const savingsDistributionChart = new Chart(savingsDistributionCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ savings_types|safe }},
+        datasets: [{
+            data: {{ savings_amounts|safe }},
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.2)',
+                'rgba(13, 110, 253, 0.2)',
+                'rgba(255, 193, 7, 0.2)',
+            ],
+            borderColor: [
+                'rgba(25, 135, 84, 1)',
+                'rgba(13, 110, 253, 1)',
+                'rgba(255, 193, 7, 1)',
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: true,
+                text: 'Savings by Type'
+            }
+        }
+    }
+});
+
+// Loan Progress Donut Chart
+const loanProgressCtx = document.getElementById('loanProgressChart').getContext('2d');
+const loanProgressChart = new Chart(loanProgressCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Paid', 'Remaining'],
+        datasets: [{
+            data: [{{ loan_paid }}, {{ loan_remaining }}],
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.2)',
+                'rgba(220, 53, 69, 0.2)'
+            ],
+            borderColor: [
+                'rgba(25, 135, 84, 1)',
+                'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: true,
+                text: 'Loan Repayment Progress'
+            }
+        }
+    }
+});
+</script>
+{% endblock script %}

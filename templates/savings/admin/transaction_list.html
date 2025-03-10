@@ -1,0 +1,349 @@
+{% extends '../../base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - Transactions{% endblock title %}
+
+{% block content %}
+<nav class="navbar navbar-dark navbar-theme-primary col-12 d-md-none">
+    <a class="navbar-brand mr-lg-5" href="{% url 'adminDashboard' %}">
+        <img class="navbar-brand-dark" src="{% static './assets/img/gv-logo.png' %}" alt="Prudent Logo" />
+        <img class="navbar-brand-light" src="{% static './assets/img/gv-logo2.png' %}" alt="Prudent Logo Dark" />
+        <h6 style="font-weight: bold; color: white;" class="mt-1 ml-2">Prudent Women</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="container-fluid bg-soft">
+    <div class="row">
+        <div class="col-12">
+            {% include '../../includes/alerts.html' %}
+            {% include '../../includes/admin_nav.html' %}
+
+            <main class="content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+                    <div>
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+                            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                                <li class="breadcrumb-item"><a href="{% url 'adminDashboard' %}"><span class="fas fa-home"></span></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'adminDashboard' %}">Prudent Women</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Transactions</li>
+                            </ol>
+                        </nav>
+                        <h2 class="h4">Transaction Management</h2>
+                        <p class="mb-0">View and manage all savings transactions</p>
+                    </div>
+
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <!-- Transaction Summary Cards -->
+                        <div class="me-3">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-success-soft text-success rounded-circle me-3">
+                                    <i class="fas fa-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block text-sm text-muted">Total Deposits</span>
+                                    <h5 class="mb-0">₦{{ total_deposits|floatformat:0|intcomma|default:"0" }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-danger-soft text-danger rounded-circle me-3">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block text-sm text-muted">Total Withdrawals</span>
+                                    <h5 class="mb-0">₦{{ total_withdrawals|floatformat:0|intcomma|default:"0" }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Filters -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3 align-items-center">
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label">Transaction Type</label>
+                                <select name="type" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="deposit" {% if request.GET.type == 'deposit' %}selected{% endif %}>Deposits</option>
+                                    <option value="withdrawal" {% if request.GET.type == 'withdrawal' %}selected{% endif %}>Withdrawals</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="approved" {% if request.GET.status == 'approved' %}selected{% endif %}>Approved</option>
+                                    <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label">Date From</label>
+                                <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <label class="form-label">Date To</label>
+                                <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter me-2"></i>Apply Filters
+                                </button>
+                                <a href="{% url 'savings:admin_transaction_list' %}" class="btn btn-light">
+                                    <i class="fas fa-redo me-2"></i>Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 text-muted px-4">Date</th>
+                                        <th class="border-0 text-muted">Member</th>
+                                        <th class="border-0 text-muted">Reference</th>
+                                        <th class="border-0 text-muted">Type</th>
+                                        <th class="border-0 text-muted">Amount</th>
+                                        <th class="border-0 text-muted">Status</th>
+                                        <th class="border-0 text-muted text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in transactions %}
+                                    <tr>
+                                        <td class="px-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-shape icon-sm bg-light rounded-circle me-2">
+                                                    <i class="fas {% if transaction.transaction_type == 'deposit' %}fa-arrow-up text-success{% else %}fa-arrow-down text-danger{% endif %}"></i>
+                                                </div>
+                                                <span class="fw-medium">{{ transaction.transaction_date|date:"M d, Y" }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if transaction.user.userprofile.profile_picture %}
+                                                    <img src="{{ transaction.user.userprofile.profile_picture.url }}" class="avatar-sm rounded-circle me-2" alt="Profile Picture">
+                                                {% else %}
+                                                    <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                        <i class="fas fa-user text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <span class="d-block fw-medium">{{ transaction.user.get_full_name }}</span>
+                                                    <small class="text-muted">{{ transaction.user.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted">{{ transaction.reference_number }}</td>
+                                        <td>
+                                            {% if transaction.transaction_type == 'deposit' %}
+                                                <span class="badge bg-success-soft text-success">Deposit</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-soft text-danger">Withdrawal</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-medium {% if transaction.transaction_type == 'deposit' %}text-success{% else %}text-danger{% endif %}">
+                                            {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}₦{{ transaction.amount|floatformat:2|intcomma }}
+                                        </td>
+                                        <td>
+                                            {% if transaction.status == 'pending' %}
+                                                <span class="badge bg-warning-soft text-warning">
+                                                    <i class="fas fa-clock me-1"></i>Pending
+                                                </span>
+                                            {% elif transaction.status == 'approved' %}
+                                                <span class="badge bg-success-soft text-success">
+                                                    <i class="fas fa-check me-1"></i>Approved
+                                                </span>
+                                            {% elif transaction.status == 'rejected' %}
+                                                <span class="badge bg-danger-soft text-danger">
+                                                    <i class="fas fa-times me-1"></i>Rejected
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a class="dropdown-item" href="{% url 'savings:admin_transaction_detail' transaction.pk %}"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                                    {% if transaction.status == 'pending' %}
+                                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Approve</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Reject</a></li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                                <p class="mb-0">No transactions found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if transactions.paginator.num_pages > 1 %}
+                        <div class="px-4 py-3 border-top">
+                            <nav>
+                                <ul class="pagination mb-0 justify-content-center">
+                                    {% if transactions.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ transactions.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+
+                                    {% if transactions.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ transactions.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ transactions.paginator.num_pages }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Icon and Badge Styles */
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .icon-sm {
+        width: 32px;
+        height: 32px;
+    }
+    .icon-shape i {
+        font-size: 1.25rem;
+    }
+    .avatar-sm {
+        width: 36px;
+        height: 36px;
+    }
+    .bg-primary-soft {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    .bg-success-soft {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    .bg-danger-soft {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    .bg-warning-soft {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    .bg-info-soft {
+        background-color: rgba(13, 202, 240, 0.1);
+    }
+
+    /* Table Styles */
+    .table > :not(caption) > * > * {
+        padding: 1rem 0.75rem;
+    }
+    .table tbody tr {
+        transition: background-color 0.2s;
+    }
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Form Controls */
+    .form-control, .form-select {
+        border: 1px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        height: auto;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #6c757d;
+        box-shadow: none;
+    }
+
+    /* Button Styles */
+    .btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-sm {
+        padding: 0.5rem 1rem;
+    }
+    .btn i {
+        font-size: 1rem;
+    }
+
+    /* Pagination */
+    .page-link {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0 3px;
+        border-radius: 50% !important;
+        font-size: 0.875rem;
+        border: none;
+    }
+    .page-link:hover {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+    .page-item.active .page-link {
+        background-color: var(--bs-primary);
+    }
+
+    /* Card Styles */
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock content %}
