@@ -103,14 +103,14 @@ WSGI_APPLICATION = "prudent_proj.wsgi.application"
 
 
 # Database
-DATABASE_URL = os.getenv('DATABASE_URL')
-DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# DATABASE_URL = os.getenv('DATABASE_URL')
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=DATABASE_URL,
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
 
 
 
@@ -124,18 +124,26 @@ DATABASES = {
     )
 }
 
-# Static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
 # Ensure the static directory exists
 os.makedirs(os.path.join(BASE_DIR, 'static'), exist_ok=True)
+
+
+# Configure whitenoise for better static file handling
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  # Changed from CompressedManifestStaticFilesStorage
+
+# Add these lines for Render deployment
+if not DEBUG:
+    STATIC_HOST = os.environ.get('STATIC_HOST', '')
+    STATIC_URL = STATIC_HOST + '/static/'
+    WHITENOISE_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'root')
+
 
 
 # Security
@@ -184,9 +192,9 @@ USE_TZ = True
 #     os.path.join(BASE_DIR, 'static'),
 # ]
 
-# # Media files
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -226,6 +234,7 @@ if DEBUG:
 
 
 # Paystack Settings
+
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 MEMBERSHIP_FEE = 2000
