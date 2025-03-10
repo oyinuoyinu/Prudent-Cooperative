@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ALLOWED_HOSTS = []
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*.onrender.com', 'prudent-cooperative.onrender.com',]
+ALLOWED_HOSTS = ['*.onrender.com',]
 
 # Application definition
 
@@ -217,7 +217,7 @@ else:
     EMAIL_HOST_PASSWORD = "ugsciuxxbyinkuiu"  # Replace this with your new App Password
     EMAIL_TIMEOUT = 5  # Reduced timeout for faster error detection
 
-DEFAULT_FROM_EMAIL = 'Prudent Women Corp <jamezslim90@gmail.com>'
+DEFAULT_FROM_EMAIL = 'MMS WoF HoF <jamezslim90@gmail.com>'
 
 # For development, store emails in the console
 if DEBUG:
