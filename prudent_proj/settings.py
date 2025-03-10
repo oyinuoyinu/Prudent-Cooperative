@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # DEBUG = True
 # ALLOWED_HOSTS = []
-
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = ['*.onrender.com', 'prudent-cooperative.onrender.com']
 
