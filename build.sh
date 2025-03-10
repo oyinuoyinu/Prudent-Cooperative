@@ -9,11 +9,16 @@ if [ -z "$DATABASE_URL" ]; then
     echo "No DATABASE_URL set, using SQLite"
 fi
 
-# Create static directory if it doesn't exist
-echo "Creating static directory..."
+# Enhanced static files handling
+echo "Setting up static files..."
+# Create static directories if they don't exist
 mkdir -p static
+mkdir -p staticfiles
+
+# No need to copy files from app directories since static is in the root
 
 # Collect static files
+echo "Collecting static files..."
 python manage.py collectstatic --no-input --clear
 
 # Create initial migrations for apps without migrations
