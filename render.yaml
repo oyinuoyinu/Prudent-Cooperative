@@ -3,7 +3,7 @@ services:
     name: prudentcorp
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn PrudentCorp.wsgi:application
+    startCommand: gunicorn prudent_proj.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

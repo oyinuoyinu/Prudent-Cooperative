@@ -28,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # DEBUG = True
 # ALLOWED_HOSTS = []
-DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*.onrender.com', 'your-app-name.onrender.com']
 
+DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = ['*.onrender.com', 'prudent-cooperative.onrender.com']
 
 # Application definition
 
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "savings.apps.SavingsConfig",
     "loans.apps.LoansConfig",
     "mono.apps.MonoConfig",
-    "apis.apps.ApisConfig",
+    # "apis.apps.ApisConfig",
     'crispy_forms',
     'crispy_bootstrap5',
     "herald",
