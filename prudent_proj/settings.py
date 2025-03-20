@@ -15,6 +15,11 @@ import os
 from decouple import config
 import dj_database_url
 
+from dotenv import load_dotenv
+from urllib.parse import urlparse
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -102,18 +107,31 @@ WSGI_APPLICATION = "prudent_proj.wsgi.application"
 
 
 
+# Replace the DATABASES section of your settings.py with this
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': 5432,
+    }
+}
 
 
 
 # Database
-DATABASE_URL = os.getenv('DATABASE_URL')
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),  # Fallback to SQLite
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# DATABASE_URL = os.getenv('DATABASE_URL')
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),  # Fallback to SQLite
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -213,11 +231,11 @@ else:
     EMAIL_HOST = "smtp.gmail.com"
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = "jamezslim90@gmail.com"
-    EMAIL_HOST_PASSWORD = "ugsciuxxbyinkuiu"  # Replace this with your new App Password
+    EMAIL_HOST_USER = "mmswofhoftv@gmail.com"
+    EMAIL_HOST_PASSWORD = "myyubtbjbwzqaheh"  # Replace this with your new App Password
     EMAIL_TIMEOUT = 5  # Reduced timeout for faster error detection
 
-DEFAULT_FROM_EMAIL = 'MMS WoF HoF <jamezslim90@gmail.com>'
+DEFAULT_FROM_EMAIL = 'MMS WoF HoF <mmswofhoftv@gmail.com>'
 
 # For development, store emails in the console
 if DEBUG:

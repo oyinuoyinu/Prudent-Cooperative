@@ -20,7 +20,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-4">
-                                        <label for="email">First Name</label>
+                                        <label for="first_name">First Name</label>
                                         <div class="input-group">
                                             <span class="input-group-text" id="basic-addon1">
                                                 <span class="fas fa-user"></span>
@@ -29,9 +29,29 @@
                                         </div>
                                     </div>
                                     <div class="form-group mb-4">
+                                        <label for="last_name">Last Name</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon2">
+                                                <span class="fas fa-user"></span>
+                                            </span>
+                                            {{ form.last_name }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label for="username">Username</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="basic-addon3">
+                                                <span class="fas fa-user"></span>
+                                            </span>
+                                            {{ form.username }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-4">
                                         <label for="email">Email</label>
                                         <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon1">
+                                            <span class="input-group-text" id="basic-addon4">
                                                 <span class="fas fa-envelope"></span>
                                             </span>
                                             {{ form.email }}
@@ -40,36 +60,16 @@
                                     <div class="form-group mb-4">
                                         <label for="password">Password</label>
                                         <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon2">
+                                            <span class="input-group-text" id="basic-addon5">
                                                 <span class="fas fa-lock"></span>
                                             </span>
                                             {{ form.password }}
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-4">
-                                        <label for="email">Last Name</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon1">
-                                                <span class="fas fa-user"></span>
-                                            </span>
-                                            {{ form.last_name }}
-                                        </div>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label for="email">Username</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon1">
-                                                <span class="fas fa-user"></span>
-                                            </span>
-                                            {{ form.username }}
-                                        </div>
-                                    </div>
                                     <div class="form-group mb-4">
                                         <label for="confirm_password">Confirm Password</label>
                                         <div class="input-group">
-                                            <span class="input-group-text" id="basic-addon2">
+                                            <span class="input-group-text" id="basic-addon6">
                                                 <span class="fas fa-lock"></span>
                                             </span>
                                             {{ form.confirm_password }}
@@ -97,7 +97,7 @@
     </section>
 </main>
 {% endblock content %}
-{% block extra_js %}
+
 <script>
     var password = document.getElementById("password")
         , confirm_password = document.getElementById("confirm_password");
@@ -113,4 +113,3 @@
     password.onchange = validatePassword;
     confirm_password.onkeyup = validatePassword;
 </script>
-{% endblock extra_js %}

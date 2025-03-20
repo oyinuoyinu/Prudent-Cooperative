@@ -6,13 +6,19 @@ from datetime import timedelta
 User = get_user_model()
 
 class PaymentAccount(models.Model):
+
+    # PLAN_CHOICES = [
+    #     ('Regular', 'Regular Savings'),
+    #     ('Investment', 'Investment Savings'),
+    #     ('Children', 'Children Savings'),
+    # ]
+
     PLAN_CHOICES = [
-        ('Regular', 'Regular Savings'),
-        ('Investment', 'Investment Savings'),
-        ('Children', 'Children Savings'),
+        ('Ordinary', 'Ordinary Savings'),
+        ('Special', 'Special Savings'),
     ]
 
-    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES, unique=True)
+    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
     account_name = models.CharField(max_length=255)
     account_number = models.CharField(max_length=50)
     bank_name = models.CharField(max_length=255)
@@ -22,10 +28,14 @@ class PaymentAccount(models.Model):
 
 
 class SavingsPlan(models.Model):
+    # PLAN_CHOICES = [
+    #     ('Regular', 'Regular Savings'),
+    #     ('Investment', 'Investment Savings'),
+    #     ('Children', 'Children Savings'),
+    # ]
     PLAN_CHOICES = [
-        ('Regular', 'Regular Savings'),
-        ('Investment', 'Investment Savings'),
-        ('Children', 'Children Savings'),
+        ('Ordinary', 'Ordinary Savings'),
+        ('Special', 'Special Savings'),
     ]
 
     STATUS_CHOICES = [
@@ -35,7 +45,7 @@ class SavingsPlan(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES)
+    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     payment_account = models.ForeignKey(PaymentAccount, on_delete=models.PROTECT, related_name="savings_plans")

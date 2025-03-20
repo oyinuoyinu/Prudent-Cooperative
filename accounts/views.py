@@ -103,11 +103,11 @@ def registerMember(request):
             user.save()
 
             # Create the member (UserProfile is created automatically by signal)
-            member = m_form.save(commit=False)
-            member.user = user
-            member.user_profile = UserProfile.objects.get(user=user)
-            member.member_slug = slugify(member.user.username)+'-'+str(member.user.id)
-            member.save()
+            # member = m_form.save(commit=False)
+            # member.user = user
+            # member.user_profile = UserProfile.objects.get(user=user)
+            # member.member_slug = slugify(member.user.username)+'-'+str(member.user.id)
+            # member.save()
 
             # Send verification email
             mail_subject = 'Please activate your account'

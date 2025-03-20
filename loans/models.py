@@ -9,12 +9,18 @@ User = get_user_model()
 
 class LoanTenure(models.Model):
     """Model to define different loan tenures and their interest rates"""
+    # PLAN_CHOICES = [
+    #     ('emergency', 'Emergency Loan'),
+    #     ('normal', 'Normal Loan'),
+    #     ('long_term', 'Long-term Loan'),
+    # ]
+
     PLAN_CHOICES = [
-        ('emergency', 'Emergency Loan'),
-        ('normal', 'Normal Loan'),
-        ('long_term', 'Long-term Loan'),
+        ('Personal', 'Personal Loan'),
+        ('Empowerment', 'Empowerment Loan'),
     ]
-    plan_type = models.CharField(max_length=20, choices=PLAN_CHOICES, unique=True)
+
+    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
     months = models.PositiveIntegerField(unique=True)
     interest_rate = models.DecimalField(
         max_digits=5,
@@ -32,14 +38,19 @@ class LoanTenure(models.Model):
 
 class LoanPlan(models.Model):
     """Model to define different types of loan plans"""
+    # PLAN_TYPES = [
+    #     ('emergency', 'Emergency Loan'),
+    #     ('normal', 'Normal Loan'),
+    #     ('long_term', 'Long-term Loan'),
+    # ]
+
     PLAN_TYPES = [
-        ('emergency', 'Emergency Loan'),
-        ('normal', 'Normal Loan'),
-        ('long_term', 'Long-term Loan'),
+        ('Personal', 'Personal Loan'),
+        ('Empowerment', 'Empowerment Loan'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="loan_plans")
-    plan_type = models.CharField(max_length=20, choices=PLAN_TYPES)
+    plan_type = models.CharField(max_length=50, choices=PLAN_TYPES)
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     description = models.TextField()
     loan_tenure = models.ForeignKey(LoanTenure, on_delete=models.PROTECT, related_name="loan_plans")

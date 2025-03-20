@@ -81,3 +81,4 @@ Thumbs.db
 __pycache__/
 *.egg-info/
 .installed.cfg
+.qodo

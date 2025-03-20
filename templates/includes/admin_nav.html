@@ -1,4 +1,14 @@
 {% load static %}
+<nav class="navbar navbar-light col-12 d-md-none" style="background-color: #FFD700;">
+    <a class="navbar-brand mr-lg-5" href="#">
+        <h6 style="font-weight: bold; color: #000;" class="mt-1 ml-2">MMS WofHof</h6>
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
 
 <nav id="sidebarMenu" class="sidebar d-md-block bg-primary text-white collapse px-4">
     <div class="sidebar-sticky pt-4 mx-auto">
@@ -19,7 +29,7 @@
                 </div>
             </div>
             <div class="collapse-close d-md-none">
-                <a href="#sidebarMenu" class="fas fa-times" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation"></a>
+                <button type="button" class="btn-close btn-close-white" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-label="Close" style="background-color: transparent;"></button>
             </div>
         </div>
         <style>
@@ -36,6 +46,9 @@
             .user-card h2, .user-card a {
                 color: white !important;
             }
+            .btn-close-white {
+                  filter: invert(1) grayscale(100%) brightness(200%);
+                 }
         </style>
         <ul class="nav flex-column mt-4">
             <li class="nav-item active">

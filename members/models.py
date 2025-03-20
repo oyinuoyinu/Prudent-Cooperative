@@ -47,7 +47,7 @@ class MembershipApplication(models.Model):
 
     # Basic Information
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    application_number = models.CharField(max_length=20, unique=True, editable=False)
+    application_number = models.CharField(max_length=50, unique=True, editable=False)
     full_name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
     state_of_origin = models.CharField(max_length=50)
@@ -58,7 +58,7 @@ class MembershipApplication(models.Model):
     profile_picture = models.ImageField(upload_to='member_pictures/', verbose_name="Soft Picture for Induction")
 
     # Bank Information
-    bank_name = models.CharField(max_length=20, choices=BANK_CHOICES, help_text="Select your bank", null=True, blank=True)
+    bank_name = models.CharField(max_length=50, choices=BANK_CHOICES, help_text="Select your bank", null=True, blank=True)
     account_name = models.CharField(max_length=100, help_text="Enter your account name as it appears in your bank", null=True, blank=True)
     account_number = models.CharField(max_length=10, help_text="Enter your 10-digit account number", null=True, blank=True)
 
@@ -81,7 +81,7 @@ class MembershipApplication(models.Model):
     payment_date = models.DateTimeField(null=True, blank=True)
 
     # Status Information
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='PENDING')
     application_date = models.DateTimeField(auto_now_add=True)
     approval_date = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True)
@@ -152,7 +152,7 @@ class PaymentVerification(models.Model):
     )
 
     application = models.ForeignKey(MembershipApplication, on_delete=models.CASCADE)
-    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES)
+    payment_type = models.CharField(max_length=50, choices=PAYMENT_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_proof = models.FileField(upload_to='payment_verifications/')
     verified = models.BooleanField(default=False)
