@@ -20,8 +20,8 @@ class LoanTenure(models.Model):
         ('Empowerment', 'Empowerment Loan'),
     ]
 
-    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
-    months = models.PositiveIntegerField(unique=True)
+    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=False)
+    months = models.PositiveIntegerField(unique=False)
     interest_rate = models.DecimalField(
         max_digits=5,
         decimal_places=2,
