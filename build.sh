@@ -34,8 +34,8 @@ python manage.py migrate sessions --noinput
 python manage.py migrate --noinput
 
 # Create superuser if needed (optional)
-if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
-    echo "Creating superuser..."
-    python manage.py createsuperuser --noinput --first_name "Admin" --last_name "User"
-fi
-echo "Build completed successfully!"
+# if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
+#     echo "Creating superuser..."
+#     python manage.py createsuperuser --noinput --first_name "Admin" --last_name "User"
+# fi
+# echo "Build completed successfully!"
