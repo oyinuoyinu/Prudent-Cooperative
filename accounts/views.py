@@ -14,7 +14,7 @@ from django.db import transaction
 from .forms import UserForm, UserProfileForm
 from .models import User, UserProfile
 from members.models import Member, MembershipApplication
-from savings.models import SavingsTransaction, SavingsPlan
+from savings.models import SavingsTransaction, SavingsPlan, SavingsPlanType
 from loans.models import LoanTransaction, Loan, LoanApplication
 from django.template.defaultfilters import slugify
 from members.forms import MemberForm
@@ -27,6 +27,8 @@ from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Restrict the member from accessing the admin page
@@ -238,141 +240,89 @@ def myAccount(request):
 @user_passes_test(check_role_member)
 def memberDashboard(request):
     user = request.user
+    try:
+        with transaction.atomic():
+            # Get active savings plan types
+            savings_types = SavingsPlanType.objects.filter(is_active=True)
+            savings_amounts = []
+            savings_data = []
 
-    # Get the last 6 months
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=180)
+            # Calculate savings by type
+            for plan_type in savings_types:
+                total = SavingsTransaction.objects.filter(
+                    savings_plan__user=user,
+                    savings_plan__plan_type=plan_type,
+                    transaction_type='deposit',
+                    status='approved'
+                ).aggregate(total=Sum('amount'))['total'] or 0
+                savings_amounts.append(float(total))
+                savings_data.append({
+                    'name': plan_type.display_name,
+                    'amount': float(total)
+                })
 
-    # Debug print statements
-    print("User:", user.username)
-    print("Date range:", start_date, "to", end_date)
+            # Calculate loan totals
+            loans = Loan.objects.filter(user=user, status='active')
+            loan_balance = sum(loan.loan_balance for loan in loans)
+            loan_paid = sum(loan.total_paid for loan in loans)
+            loan_remaining = sum(loan.remaining_balance for loan in loans)
 
-    # Monthly savings data
-    monthly_savings = (
-        SavingsTransaction.objects
-        .filter(
-            savings_plan__user=user,
-            transaction_type='deposit',
-            status='approved',
-            transaction_date__range=(start_date, end_date)
-        )
-        .annotate(month=TruncMonth('transaction_date'))
-        .values('month')
-        .annotate(total=Sum('amount'))
-        .order_by('month')
-    )
+            # Get monthly data
+            today = timezone.now().date()
+            first_day = today.replace(day=1)
+            months = []
+            savings_monthly = []
+            loans_monthly = []
 
-    print("Monthly savings query:", monthly_savings.query)
-    print("Monthly savings data:", list(monthly_savings))
+            # Get last 6 months of data
+            for i in range(5, -1, -1):
+                current_date = first_day - timedelta(days=1)
+                first_day = current_date.replace(day=1)
 
-    # Monthly loans data
-    monthly_loans = (
-        LoanTransaction.objects
-        .filter(
-            loan__user=user,
-            transaction_type='repayment',
-            status='approved',
-            payment_date__range=(start_date, end_date)
-        )
-        .annotate(month=TruncMonth('payment_date'))
-        .values('month')
-        .annotate(total=Sum('amount'))
-        .order_by('month')
-    )
+                # Monthly savings
+                monthly_savings = SavingsTransaction.objects.filter(
+                    savings_plan__user=user,
+                    transaction_type='deposit',
+                    status='approved',
+                    transaction_date__year=current_date.year,
+                    transaction_date__month=current_date.month
+                ).aggregate(total=Sum('amount'))['total'] or 0
 
-    print("Monthly loans query:", monthly_loans.query)
-    print("Monthly loans data:", list(monthly_loans))
+                # Monthly loan payments
+                monthly_loan = LoanTransaction.objects.filter(
+                    loan__user=user,
+                    transaction_type='repayment',
+                    status='approved',
+                    payment_date__year=current_date.year,
+                    payment_date__month=current_date.month
+                ).aggregate(total=Sum('amount'))['total'] or 0
 
-    # Generate last 6 months properly
-    months = []
-    savings_data = []
-    loans_data = []
+                months.append(current_date.strftime('%B %Y'))
+                savings_monthly.append(float(monthly_savings))
+                loans_monthly.append(float(monthly_loan))
 
-    current_date = end_date
-    for i in range(6):
-        # Get first day of current month
-        first_day = current_date.replace(day=1)
-        month_name = current_date.strftime('%B')
+            # Reverse lists to show oldest to newest
+            months.reverse()
+            savings_monthly.reverse()
+            loans_monthly.reverse()
 
-        # Add to the beginning of our lists
-        months.insert(0, month_name)
+            context = {
+                'monthly_labels': json.dumps(months),
+                'monthly_savings': json.dumps(savings_monthly),
+                'monthly_loans': json.dumps(loans_monthly),
+                'savings_types': json.dumps([plan_type.display_name for plan_type in savings_types]),
+                'savings_amounts': json.dumps([float(amount) for amount in savings_amounts]),
+                'savings_data': savings_data,
+                'loan_paid': float(loan_paid),
+                'loan_remaining': float(loan_remaining),
+                'loan_balance': float(loan_balance),
+            }
 
-        # Find savings for this month
-        month_savings = next(
-            (item['total'] for item in monthly_savings if item['month'].strftime('%B') == month_name),
-            0
-        )
-        savings_data.insert(0, float(month_savings or 0))
-
-        # Find loans for this month
-        month_loans = next(
-            (item['total'] for item in monthly_loans if item['month'].strftime('%B') == month_name),
-            0
-        )
-        loans_data.insert(0, float(month_loans or 0))
-
-        # Move to previous month
-        current_date = first_day - timedelta(days=1)
-
-    print("Final months:", months)
-    print("Final savings data:", savings_data)
-    print("Final loans data:", loans_data)
-
-    # Calculate savings by type
-    savings_types = ['Regular', 'Investment', 'Children']
-    savings_amounts = []
-
-    for plan_type in savings_types:
-        total = SavingsTransaction.objects.filter(
-            savings_plan__user=user,
-            savings_plan__plan_type=plan_type,
-            transaction_type='deposit',
-            status='approved'
-        ).aggregate(total=Sum('amount'))['total'] or 0
-        savings_amounts.append(float(total))
-
-    # Calculate loan totals
-    active_loans = Loan.objects.filter(user=user, status='active')
-    total_loan_amount = active_loans.aggregate(total=Sum('total_payable'))['total'] or 0
-    total_paid = sum(
-        loan.transactions.filter(
-            transaction_type='repayment',
-            status='approved'
-        ).aggregate(total=Sum('amount'))['total'] or 0
-        for loan in active_loans
-    )
-    loan_remaining = total_loan_amount - total_paid if total_loan_amount > 0 else 0
-
-    # Calculate total savings
-    total_savings = SavingsTransaction.objects.filter(
-        savings_plan__user=user,
-        transaction_type='deposit',
-        status='approved'
-    ).aggregate(total=Sum('amount'))['total'] or 0
-
-    context = {
-        'monthly_labels': json.dumps(months),
-        'monthly_savings': json.dumps(savings_data),
-        'monthly_loans': json.dumps(loans_data),
-        'savings_types': json.dumps(savings_types),
-        'savings_amounts': json.dumps([float(amount) for amount in savings_amounts]),
-        'loan_paid': float(total_paid),
-        'loan_remaining': float(loan_remaining),
-        'total_savings': float(total_savings),
-        'total_loans': float(total_loan_amount),
-        'loan_balance': float(loan_remaining),
-        'debug': True,
-    }
-
-    # Debug the final context
-    print("Context data for charts:", {
-        'monthly_labels': months,
-        'monthly_savings': savings_data,
-        'monthly_loans': loans_data,
-        'savings_amounts': savings_amounts
-    })
-
-    return render(request, 'accounts/memberDashboard.html', context)
+            return render(request, 'accounts/memberDashboard.html', context)
+    except Exception as e:
+        logger.error(f"Error in memberDashboard for user {user.username}: {str(e)}")
+        messages.error(request, "An error occurred while loading your dashboard. Please try again.")
+        return redirect('home')
 
 
 @login_required(login_url='login')
@@ -445,7 +395,7 @@ def adminDashboard(request):
         current_date = first_day - timedelta(days=1)
 
     # Savings distribution data
-    savings_types = ['Regular', 'Investment', 'Children']
+    savings_types = SavingsPlanType.objects.filter(is_active=True)
     savings_amounts = []
 
     for plan_type in savings_types:
@@ -484,7 +434,7 @@ def adminDashboard(request):
         'monthly_labels': json.dumps(months),
         'monthly_savings': json.dumps(savings_data),
         'monthly_loans': json.dumps(loans_data),
-        'savings_types': json.dumps(savings_types),
+        'savings_types': json.dumps([plan_type.name for plan_type in savings_types]),
         'savings_amounts': json.dumps([float(amount) for amount in savings_amounts]),
         'loan_paid': float(total_paid),
         'loan_remaining': float(loan_remaining),

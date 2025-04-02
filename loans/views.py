@@ -62,42 +62,52 @@ class LoanPlansListView(LoginRequiredMixin, ListView):
     context_object_name = 'loan_plans'
 
     def get_queryset(self):
-        return LoanPlan.objects.filter(user=self.request.user)
+        try:
+            return LoanPlan.objects.filter(
+                user=self.request.user,
+                status='active'
+            ).select_related('plan_type')
+        except Exception as e:
+            logger.error(f"Error fetching loan plans for user {self.request.user.username}: {str(e)}")
+            return LoanPlan.objects.none()
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        try:
+            context = super().get_context_data(**kwargs)
 
-        # Get all loans for the user
-        user_loans = Loan.objects.filter(user=self.request.user)
+            # Get all active loans
+            active_loans = Loan.objects.filter(
+                user=self.request.user,
+                status='active'
+            ).select_related('plan')
 
-        # Get total active loans
-        context['active_loans'] = user_loans.filter(status='active').count()
+            # Calculate loan totals
+            total_loan_amount = Decimal('0')
+            total_paid = Decimal('0')
+            loan_remaining = Decimal('0')
 
-        # Get total loan amount
-        context['total_loan_amount'] = user_loans.aggregate(
-            total=Sum('loan_amount')
-        )['total'] or 0
+            for loan in active_loans:
+                total_loan_amount += loan.total_payable
+                total_paid += loan.total_paid
+                loan_remaining += loan.remaining_balance
 
-        # Get user's transactions
-        user_transactions = LoanTransaction.objects.filter(
-            loan__user=self.request.user
-        ).order_by('-payment_date')
+            context.update({
+                'total_loan_amount': total_loan_amount,
+                'total_paid': total_paid,
+                'loan_remaining': loan_remaining,
+                'active_loans': active_loans,
+            })
 
-        # Paginate the transactions
-        paginator = Paginator(user_transactions, 20)
-        page_number = self.request.GET.get('page')
-        context['user_transactions'] = paginator.get_page(page_number)
+            # Get recent transactions
+            context['recent_transactions'] = LoanTransaction.objects.filter(
+                loan__user=self.request.user,
+                status='approved'
+            ).select_related('loan').order_by('-payment_date')[:10]
 
-        # Get pending transactions count
-        context['pending_transactions'] = user_transactions.filter(status='pending').count()
-
-        # Get loan applications
-        context['pending_applications'] = LoanApplication.objects.filter(
-            user=self.request.user,
-            status='pending'
-        ).count()
-
-        return context
+            return context
+        except Exception as e:
+            logger.error(f"Error in LoanPlansListView context for user {self.request.user.username}: {str(e)}")
+            return super().get_context_data(**kwargs)
 
 class LoanPlanDetailView(LoginRequiredMixin, DetailView):
     """View to display details of a specific loan plan"""

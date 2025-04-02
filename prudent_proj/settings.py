@@ -27,15 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++"
+SECRET_KEY = "django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++"
 
-# # SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don't run with debug turned on in production!
 
-# DEBUG = True
-# ALLOWED_HOSTS = []
-SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
-DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative.onrender.com']
+DEBUG = True
+ALLOWED_HOSTS = ['*']
+# SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
+# DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
+# ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative.onrender.com','localhost','127.0.0.1']
 
 # Application definition
 
@@ -122,17 +122,6 @@ DATABASES = {
 }
 
 
-
-# Database
-# DATABASE_URL = os.getenv('DATABASE_URL')
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),  # Fallback to SQLite
-#         conn_max_age=600,
-#         conn_health_checks=True,
-#     )
-# }
-
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -156,10 +145,10 @@ if not DEBUG:
 
 
 # Security
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+#CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

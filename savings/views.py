@@ -38,32 +38,50 @@ class SavingsPlansListView(LoginRequiredMixin, ListView):
     context_object_name = 'savings_plans'
 
     def get_queryset(self):
-        return SavingsPlan.objects.filter(user=self.request.user)
+        try:
+            return SavingsPlan.objects.filter(
+                user=self.request.user,
+                status='active'
+            ).select_related('plan_type')
+        except Exception as e:
+            logger.error(f"Error fetching savings plans for user {self.request.user.username}: {str(e)}")
+            return SavingsPlan.objects.none()
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add total savings across all plans
-        context['total_savings'] = sum(plan.amount for plan in context['savings_plans'])
-        # Add total interest earned
-        context['total_interest'] = sum(plan.calculate_interest() for plan in context['savings_plans'])
+        try:
+            context = super().get_context_data(**kwargs)
 
-        # Now, adding transactions for the current user (similar to UserTransactionListView)
-        user_transactions = SavingsTransaction.objects.filter(savings_plan__user=self.request.user).order_by('-transaction_date')
+            # Calculate totals
+            plans = context['savings_plans']
+            context['total_savings'] = sum(
+                SavingsTransaction.objects.filter(
+                    savings_plan=plan,
+                    transaction_type='deposit',
+                    status='approved'
+                ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+                for plan in plans
+            )
 
-        # Paginate the transactions (by 20 transactions per page)
-        paginator = Paginator(user_transactions, 20)
-        page_number = self.request.GET.get('page')  # Get the page number from the request
-        page_obj = paginator.get_page(page_number)
+            # Calculate interest for each plan
+            total_interest = Decimal('0')
+            for plan in plans:
+                try:
+                    total_interest += plan.calculate_interest()
+                except Exception as e:
+                    logger.error(f"Error calculating interest for plan {plan.id}: {str(e)}")
 
-        # Adding the paginated transactions to the context
-        context['user_transactions'] = page_obj
-        # # Adding the list of transactions to context
-        # context['user_transactions'] = user_transactions
+            context['total_interest'] = total_interest
 
-        # Optionally, you can also add counts for pending transactions
-        context['pending_transactions'] = user_transactions.filter(status='pending').count()
+            # Get recent transactions
+            context['recent_transactions'] = SavingsTransaction.objects.filter(
+                savings_plan__user=self.request.user,
+                status='approved'
+            ).select_related('savings_plan').order_by('-transaction_date')[:10]
 
-        return context
+            return context
+        except Exception as e:
+            logger.error(f"Error in SavingsPlansListView context for user {self.request.user.username}: {str(e)}")
+            return super().get_context_data(**kwargs)
 
 
 class SavingsPlanDetailView(LoginRequiredMixin, DetailView):

@@ -57,7 +57,8 @@ class PaymentAccount(models.Model):
     bank_name = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.bank_name} - {self.account_number} ({self.get_plan_type_display()})"
+        plan_name = self.plan_type.display_name if self.plan_type else "No Plan"
+        return f"{self.bank_name} - {self.account_number} ({plan_name})"
 
 
 class SavingsPlan(models.Model):
@@ -106,7 +107,7 @@ class SavingsPlan(models.Model):
         return 0.00
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - {self.plan_type}"
+        return f"{self.user.first_name} {self.user.last_name} - {self.plan_type.display_name}"
 
 
 class SavingsTransaction(models.Model):
@@ -151,4 +152,4 @@ class SavingsTransaction(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.transaction_type.capitalize()} - {self.amount} for {self.savings_plan}"
+        return f"{self.transaction_type.capitalize()} - {self.amount} for {self.savings_plan.user.first_name} {self.savings_plan.user.last_name} - {self.savings_plan.plan_type.display_name}"

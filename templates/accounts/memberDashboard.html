@@ -326,36 +326,37 @@ const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
     }
 });
 
-// Savings Distribution Pie Chart
-const savingsDistributionCtx = document.getElementById('savingsDistributionChart').getContext('2d');
-const savingsDistributionChart = new Chart(savingsDistributionCtx, {
-    type: 'pie',
+// Savings Distribution Chart
+const savingsCtx = document.getElementById('savingsDistributionChart').getContext('2d');
+const savingsTypes = JSON.parse('{{ savings_types|safe }}');
+const savingsAmounts = JSON.parse('{{ savings_amounts|safe }}');
+
+new Chart(savingsCtx, {
+    type: 'doughnut',
     data: {
-        labels: {{ savings_types|safe }},
+        labels: savingsTypes.map(s => s.display_name),
         datasets: [{
-            data: {{ savings_amounts|safe }},
+            data: savingsAmounts,
             backgroundColor: [
-                'rgba(25, 135, 84, 0.2)',
-                'rgba(13, 110, 253, 0.2)',
-                'rgba(255, 193, 7, 0.2)',
-            ],
-            borderColor: [
-                'rgba(25, 135, 84, 1)',
-                'rgba(13, 110, 253, 1)',
-                'rgba(255, 193, 7, 1)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(153, 102, 255, 0.8)'
             ],
             borderWidth: 1
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom',
+                position: 'bottom'
             },
             title: {
                 display: true,
-                text: 'Savings by Type'
+                text: 'Savings Distribution'
             }
         }
     }

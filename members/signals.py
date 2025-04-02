@@ -101,13 +101,12 @@ def handle_member_creation(sender, instance, created, **kwargs):
                             LoanPlan.objects.create(
                                 user=instance.user,
                                 plan_type=loan_type,
-                                min_amount=loan_type.min_amount,
-                                max_amount=loan_type.max_amount,
-                                description=loan_type.description
+                                amount=0,
+                                status='active'
                             )
-                            logger.info(f"Created {loan_type.display_name} loan plan")
                     except Exception as e:
-                        logger.error(f"Error creating {loan_type.display_name} loan plan: {str(e)}")
+                        logger.error(f"Error creating loan plan for user {instance.user.username}: {str(e)}")
+                        raise
 
                 # Create savings plans for each active savings type
                 for savings_type in SavingsPlanType.objects.filter(is_active=True):
@@ -116,24 +115,27 @@ def handle_member_creation(sender, instance, created, **kwargs):
                         if not SavingsPlan.objects.filter(user=instance.user, plan_type=savings_type).exists():
                             logger.info(f"Creating {savings_type.display_name} savings plan for user {instance.user.username}")
 
-                            SavingsPlan.objects.create(
+                            # Create the savings plan
+                            savings_plan = SavingsPlan.objects.create(
                                 user=instance.user,
                                 plan_type=savings_type,
                                 amount=0,
-                                target_amount=savings_type.min_amount,
-                                description=savings_type.description
+                                status='active',
+                                start_date=timezone.now().date()
                             )
-                            logger.info(f"Created {savings_type.display_name} savings plan")
-                    except Exception as e:
-                        logger.error(f"Error creating {savings_type.display_name} savings plan: {str(e)}")
 
-                # Create payment account if it doesn't exist
-                PaymentAccount.objects.get_or_create(
-                    user=instance.user,
-                    defaults={'balance': 0}
-                )
-                logger.info(f"Created payment account for user {instance.user.username}")
+                            # Create a payment account for this plan type if it doesn't exist
+                            if not PaymentAccount.objects.filter(plan_type=savings_type).exists():
+                                PaymentAccount.objects.create(
+                                    plan_type=savings_type,
+                                    account_name=f"{savings_type.display_name} Account",
+                                    account_number="TBD",  # This should be updated by admin
+                                    bank_name="TBD"  # This should be updated by admin
+                                )
+                    except Exception as e:
+                        logger.error(f"Error creating savings plan for user {instance.user.username}: {str(e)}")
+                        raise
 
     except Exception as e:
-        logger.error(f"Error in handle_member_creation for {instance.membership_number}: {str(e)}")
+        logger.error(f"Error in member creation signal for {instance.membership_number}: {str(e)}")
         raise
