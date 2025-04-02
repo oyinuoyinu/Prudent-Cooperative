@@ -55,11 +55,11 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    {% if plan.plan_type == 'Normal' %}
+                                    {% if plan.plan_type.name == 'Normal' %}
                                         <div class="icon-shape bg-primary-soft text-primary rounded-circle">
                                             <i class="fas fa-chart-line"></i>
                                         </div>
-                                    {% elif plan.plan_type == 'Emergency' %}
+                                    {% elif plan.plan_type.name == 'Emergency' %}
                                         <div class="icon-shape bg-success-soft text-success rounded-circle">
                                             <i class="fas fa-child"></i>
                                         </div>
@@ -79,7 +79,7 @@
                                     <div class="d-flex align-items-center mb-2">
                                         <h3 class="mb-0">₦{{plan.amount|floatformat:0|intcomma|default:"0"}}</h3>
                                         <span class="badge bg-success-soft text-success ms-2">
-                                            <i class="fas fa-chart-line me-1"></i>{{plan.loan_tenure.interest_rate}}%
+                                            <i class="fas fa-chart-line me-1"></i>{{plan.plan_type.default_interest_rate}}%
                                         </span>
                                     </div>
                                     <p class="text-muted mb-0">Loan Balance</p>
@@ -88,7 +88,7 @@
                                 <div class="mb-4">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Duration</span>
-                                        <span class="fw-medium">{{plan.loan_tenure.months}} months</span>
+                                        <span class="fw-medium">{{plan.plan_type.loan_tenure.months}} months</span>
                                     </div>
                                     <!-- {% if plan.min_amount %}
                                     <div class="d-flex justify-content-between">

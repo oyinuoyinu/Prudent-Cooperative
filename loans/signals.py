@@ -14,11 +14,11 @@ def create_loan_on_disbursement(sender, instance, created, **kwargs):
     """
     if instance.status == 'disbursed':
         # Calculate monthly payment and total payable
-        interest_rate = Decimal(str(instance.tenure.interest_rate)) / Decimal('100')
-        months_ratio = Decimal(str(instance.tenure.months)) / Decimal('12')
+        interest_rate = Decimal(str(instance.loan_plan.plan_type.default_interest_rate)) / Decimal('100')
+        months_ratio = Decimal(str(instance.loan_plan.plan_type.minimum_duration_months)) / Decimal('12')
         total_interest = Decimal(str(instance.loan_amount)) * interest_rate * months_ratio
         total_payable = Decimal(str(instance.loan_amount)) + total_interest
-        monthly_payment = total_payable / Decimal(str(instance.tenure.months))
+        monthly_payment = total_payable / Decimal(str(instance.loan_plan.plan_type.minimum_duration_months))
 
         # Create Loan instance if it doesn't exist
         loan, created = Loan.objects.get_or_create(
@@ -33,7 +33,7 @@ def create_loan_on_disbursement(sender, instance, created, **kwargs):
                 'loan_balance': total_payable,  # Initial balance includes interest
                 'total_disbursed': Decimal('0'),  # Will be updated by transaction signal
                 'disbursement_date': None,  # Will be set by transaction signal
-                'final_payment_date': timezone.now().date() + timezone.timedelta(days=30 * instance.tenure.months)
+                'final_payment_date': timezone.now().date() + timezone.timedelta(days=30 * instance.loan_plan.plan_type.minimum_duration_months)
             }
         )
 
@@ -46,7 +46,7 @@ def create_loan_on_disbursement(sender, instance, created, **kwargs):
                 transaction_type='disbursement',
                 status='approved',
                 payment_date=timezone.now(),
-                description=f'Initial loan disbursement for {instance.loan_plan.get_plan_type_display()}'
+                description=f'Initial loan disbursement for {instance.loan_plan.plan_type.display_name}'
             )
 
 
@@ -59,72 +59,41 @@ def update_loan_on_transaction(sender, instance, created, **kwargs):
     3. Update loan plan total amount
     4. Validate transaction amounts
     """
-    loan = instance.loan
-    loan_plan = instance.loan_plan or loan.loan_plan  # Fallback to loan's plan if not set
-
     if instance.status == 'approved':
+        loan = instance.loan
+
         if instance.transaction_type == 'disbursement':
-            # Validate total disbursement against loan amount
-            total_disbursed = (loan.total_disbursed or Decimal('0')) + Decimal(str(instance.amount))
-            if total_disbursed > Decimal(str(loan.loan_amount)):
-                instance.status = 'rejected'
-                instance.save()
-                return
-
-            # Update total disbursed only, loan_balance is already set correctly in create_loan_on_disbursement
-            loan.total_disbursed = total_disbursed
-
-            # Update loan plan total amount
-            loan_plan.amount = (loan_plan.amount or Decimal('0')) + Decimal(str(instance.amount))
-            loan_plan.save()
-
-            # Set initial disbursement date if not set
-            if not loan.disbursement_date:
-                loan.disbursement_date = timezone.now()
-
-            # Update loan status
+            # Update loan disbursement info
+            loan.total_disbursed = Decimal(str(instance.amount))
+            loan.disbursement_date = instance.payment_date
+            loan.next_payment_date = instance.payment_date + timezone.timedelta(days=30)
             loan.status = 'active'
 
-            # Update next payment date (monthly schedule)
-            loan.next_payment_date = timezone.now().date() + timezone.timedelta(days=30)
-
         elif instance.transaction_type == 'repayment':
-            # Validate payment amount
-            if Decimal(str(instance.amount)) > Decimal(str(loan.loan_balance)):
-                instance.amount = loan.loan_balance
-                instance.save()
+            # Update loan balance
+            loan.loan_balance -= instance.amount
 
-            # Update loan balance and payment tracking
-            loan.loan_balance -= Decimal(str(instance.amount))
-            loan.total_paid = (loan.total_paid or Decimal('0')) + Decimal(str(instance.amount))
+            # Update next payment date
+            if loan.loan_balance > 0:
+                loan.next_payment_date = instance.payment_date + timezone.timedelta(days=30)
 
-            # Update loan plan total amount
-            loan_plan.amount = (loan_plan.amount or Decimal('0')) - Decimal(str(instance.amount))
-            loan_plan.save()
-
-            # Update payment status
-            if loan.next_payment_date and timezone.now().date() <= loan.next_payment_date:
-                loan.payment_status = 'on_schedule'
-            else:
-                loan.payment_status = 'late'
-
-            # Check if loan is fully paid
-            if Decimal(str(loan.loan_balance)) <= 0:
+            # Check if loan is fully repaid
+            if loan.loan_balance <= 0:
                 loan.status = 'completed'
-                loan.loan_balance = Decimal('0')
-                loan.completion_date = timezone.now()
+                loan.payment_status = 'paid'
             else:
-                # Update next payment date (monthly schedule)
-                loan.next_payment_date = timezone.now().date() + timezone.timedelta(days=30)
+                # Update payment status based on schedule
+                if instance.payment_date <= loan.next_payment_date:
+                    loan.payment_status = 'up_to_date'
+                else:
+                    loan.payment_status = 'late'
 
-    elif instance.status == 'rejected':
-        if instance.transaction_type == 'disbursement':
-            # If it's the initial disbursement and it's rejected, cancel the loan
-            if not loan.disbursement_date:
-                loan.status = 'cancelled'
+        loan.save()
 
-    # Calculate payment progress
-    if Decimal(str(loan.loan_amount)) and Decimal(str(loan.total_paid)):
-        loan.payment_progress = (Decimal(str(loan.total_paid)) / Decimal(str(loan.loan_amount))) * 100
-
-    loan.save()
+        # Update loan plan total amount
+        total_disbursed = (
+            LoanTransaction.objects
+            .filter(loan_plan=instance.loan_plan, transaction_type='disbursement', status='approved')
+            .aggregate(total=Sum('amount'))
+        )
+        instance.loan_plan.amount = total_disbursed['total'] or Decimal('0')

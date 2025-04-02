@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum, Q
-from .models import LoanApplication, LoanTenure
+from .models import LoanApplication
 from members.models import Member
 from savings.models import SavingsPlan, SavingsTransaction
 from decimal import Decimal

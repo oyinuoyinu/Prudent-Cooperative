@@ -2,8 +2,40 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 User = get_user_model()
+
+
+class SavingsPlanType(models.Model):
+    """Model to manage different types of savings plans"""
+    name = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    default_interest_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=10.00,
+        validators=[MinValueValidator(0)]
+    )
+    minimum_duration_months = models.PositiveIntegerField(default=24)  # 2 years default
+    minimum_balance = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        validators=[MinValueValidator(0)]
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.display_name
+
+    class Meta:
+        ordering = ['name']
+
+
 
 class PaymentAccount(models.Model):
 
@@ -13,12 +45,13 @@ class PaymentAccount(models.Model):
     #     ('Children', 'Children Savings'),
     # ]
 
-    PLAN_CHOICES = [
-        ('Ordinary', 'Ordinary Savings'),
-        ('Special', 'Special Savings'),
-    ]
+    # PLAN_CHOICES = [
+    #     ('Ordinary', 'Ordinary Savings'),
+    #     ('Special', 'Special Savings'),
+    # ]
 
-    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
+    # plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
+    plan_type = models.ForeignKey(SavingsPlanType, on_delete=models.PROTECT, related_name="payment_accounts", null=True, blank=True)
     account_name = models.CharField(max_length=255)
     account_number = models.CharField(max_length=50)
     bank_name = models.CharField(max_length=255)
@@ -33,10 +66,10 @@ class SavingsPlan(models.Model):
     #     ('Investment', 'Investment Savings'),
     #     ('Children', 'Children Savings'),
     # ]
-    PLAN_CHOICES = [
-        ('Ordinary', 'Ordinary Savings'),
-        ('Special', 'Special Savings'),
-    ]
+    # PLAN_CHOICES = [
+    #     ('Ordinary', 'Ordinary Savings'),
+    #     ('Special', 'Special Savings'),
+    # ]
 
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -45,7 +78,7 @@ class SavingsPlan(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES)
+    plan_type = models.ForeignKey(SavingsPlanType, on_delete=models.PROTECT, related_name="savings_plans", null=True, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     payment_account = models.ForeignKey(PaymentAccount, on_delete=models.PROTECT, related_name="savings_plans")

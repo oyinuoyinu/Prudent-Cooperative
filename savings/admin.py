@@ -7,6 +7,11 @@ class SavingsPlanAdmin(admin.ModelAdmin):
     list_filter = ('plan_type', 'created_at')
     search_fields = ('user__username', 'plan_type', 'created_at')
 
+class SavingsPlanTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'display_name', 'description', 'minimum_duration_months', 'default_interest_rate', 'is_active')
+    list_filter = ('is_active', 'default_interest_rate')
+    search_fields = ('name', 'display_name', 'description')
+
 class PaymentAccountAdmin(admin.ModelAdmin):
     list_display = ('plan_type', 'account_name', 'account_number', 'bank_name')
     list_filter = ('plan_type', 'bank_name')
@@ -35,5 +40,6 @@ class SavingsTransactionAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 admin.site.register(SavingsPlan, SavingsPlanAdmin)
+admin.site.register(SavingsPlanType, SavingsPlanTypeAdmin)
 admin.site.register(PaymentAccount, PaymentAccountAdmin)
 admin.site.register(SavingsTransaction, SavingsTransactionAdmin)

@@ -7,34 +7,66 @@ from django.conf import settings
 
 User = get_user_model()
 
-class LoanTenure(models.Model):
-    """Model to define different loan tenures and their interest rates"""
-    # PLAN_CHOICES = [
-    #     ('emergency', 'Emergency Loan'),
-    #     ('normal', 'Normal Loan'),
-    #     ('long_term', 'Long-term Loan'),
-    # ]
 
-    PLAN_CHOICES = [
-        ('Personal', 'Personal Loan'),
-        ('Empowerment', 'Empowerment Loan'),
-    ]
+class LoanPlanType(models.Model):
+    """Model to define different types of loan plans and their characteristics"""
 
-    plan_type = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=False)
-    months = models.PositiveIntegerField(unique=False)
-    interest_rate = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('100.00'))]
-    )
+    name = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    minimum_duration_months = models.PositiveIntegerField(default=24)
+    min_amount = models.DecimalField(max_digits=12,decimal_places=2,help_text="Minimum amount that can be borrowed under this plan")
+    max_amount = models.DecimalField(max_digits=12,decimal_places=2,help_text="Maximum amount that can be borrowed under this plan")
+    default_interest_rate = models.DecimalField(max_digits=5,decimal_places=2,validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('100.00'))],help_text="Default annual interest rate for this plan type")
+    processing_fee_percentage = models.DecimalField(max_digits=5,decimal_places=2,default=Decimal('1.50'),help_text="Loan processing fee as a percentage of the loan amount")
+    requirements = models.TextField(help_text="Requirements and documentation needed for this loan type")
+    min_credit_score = models.IntegerField(default=0,help_text="Minimum credit score required for this loan type")
+    min_membership_duration = models.IntegerField(default=0,help_text="Minimum membership duration in months required for this loan type")
+    guarantors_required = models.IntegerField(default=2,help_text="Number of guarantors required for this loan type")
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['months']
+        ordering = ['name']
 
     def __str__(self):
-        return f"{self.months} months ({self.interest_rate}% interest)"
+        return self.display_name
+
+    def clean(self):
+        if self.min_amount > self.max_amount:
+            raise ValidationError("Minimum amount cannot be greater than maximum amount")
+
+
+
+# class LoanTenure(models.Model):
+#     """Model to define different loan tenures and their interest rates"""
+#     # PLAN_CHOICES = [
+#     #     ('emergency', 'Emergency Loan'),
+#     #     ('normal', 'Normal Loan'),
+#     #     ('long_term', 'Long-term Loan'),
+#     # ]
+
+#     # PLAN_CHOICES = [
+#     #     ('Personal', 'Personal Loan'),
+#     #     ('Empowerment', 'Empowerment Loan'),
+#     # ]
+
+#     plan_type = models.ForeignKey(LoanPlanType, on_delete=models.PROTECT, related_name="tenures")
+#     months = models.PositiveIntegerField(unique=False)
+#     interest_rate = models.DecimalField(
+#         max_digits=5,
+#         decimal_places=2,
+#         validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('100.00'))]
+#     )
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     class Meta:
+#         ordering = ['months']
+
+#     def __str__(self):
+#         return f"{self.months} months ({self.interest_rate}% interest)"
 
 class LoanPlan(models.Model):
     """Model to define different types of loan plans"""
@@ -44,16 +76,15 @@ class LoanPlan(models.Model):
     #     ('long_term', 'Long-term Loan'),
     # ]
 
-    PLAN_TYPES = [
-        ('Personal', 'Personal Loan'),
-        ('Empowerment', 'Empowerment Loan'),
-    ]
+    # PLAN_TYPES = [
+    #     ('Personal', 'Personal Loan'),
+    #     ('Empowerment', 'Empowerment Loan'),
+    # ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="loan_plans")
-    plan_type = models.CharField(max_length=50, choices=PLAN_TYPES)
+    plan_type = models.ForeignKey(LoanPlanType, on_delete=models.PROTECT, related_name="loan_plans")
     amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     description = models.TextField()
-    loan_tenure = models.ForeignKey(LoanTenure, on_delete=models.PROTECT, related_name="loan_plans")
     min_amount = models.DecimalField(max_digits=12, decimal_places=2)
     max_amount = models.DecimalField(max_digits=12, decimal_places=2)
     # available_tenures = models.ManyToManyField(LoanTenure)
@@ -61,15 +92,18 @@ class LoanPlan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if self.plan_type == 'investment' and self.interest_rate == 0.00:
-            self.interest_rate = 10.00  # 10% interest for investment plans
 
-        # Ensure that the minimum and maximum amounts are correctly set
-        if self.min_amount > self.max_amount:
-            raise ValueError(
-                "Minimum amount cannot be greater than maximum amount"
-            )
+    def save(self, *args, **kwargs):
+        # Validate amount against plan type limits
+        if self.amount:
+            if self.amount < self.plan_type.min_amount:
+                raise ValueError(
+                    f"Amount cannot be less than minimum amount of ₦{self.plan_type.min_amount:,.2f}"
+                )
+            if self.amount > self.plan_type.max_amount:
+                raise ValueError(
+                    f"Amount cannot be greater than maximum amount of ₦{self.plan_type.max_amount:,.2f}"
+                )
 
         super().save(*args, **kwargs)
 
@@ -81,6 +115,46 @@ class LoanPlan(models.Model):
 
     def __str__(self):
         return f"{self.plan_type} ({self.loan_tenure})"
+
+
+    # def calculate_monthly_payment(self):
+    #     """Calculate monthly payment including interest"""
+    #     if not self.amount:
+    #         return Decimal('0.00')
+
+    #     principal = self.amount
+    #     annual_rate = self.loan_tenure.interest_rate / Decimal('100.00')
+    #     monthly_rate = annual_rate / Decimal('12.00')
+    #     num_payments = self.loan_tenure.months
+
+    #     # Using the PMT formula: PMT = P * (r * (1 + r)^n) / ((1 + r)^n - 1)
+    #     if monthly_rate == 0:
+    #         return principal / num_payments
+
+    #     numerator = monthly_rate * (1 + monthly_rate) ** num_payments
+    #     denominator = (1 + monthly_rate) ** num_payments - 1
+    #     monthly_payment = principal * (numerator / denominator)
+
+    #     return monthly_payment.quantize(Decimal('.01'))
+
+    # def __str__(self):
+    #     return f"{self.plan_type.display_name} - ₦{self.amount:,.2f}"
+
+
+
+    # def save(self, *args, **kwargs):
+    #     if self.plan_type == 'investment' and self.interest_rate == 0.00:
+    #         self.interest_rate = 10.00  # 10% interest for investment plans
+
+    #     # Ensure that the minimum and maximum amounts are correctly set
+    #     if self.min_amount > self.max_amount:
+    #         raise ValueError(
+    #             "Minimum amount cannot be greater than maximum amount"
+    #         )
+
+    #     super().save(*args, **kwargs)
+
+
 
 class Guarantor(models.Model):
     """Model for loan guarantors"""
@@ -126,9 +200,10 @@ class LoanApplication(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='loan_applications')
     loan_plan = models.ForeignKey(LoanPlan, on_delete=models.PROTECT)
+    plan_type = models.ForeignKey(LoanPlanType, on_delete=models.PROTECT, null=True, blank=True, related_name="loan_applications")
     loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
     loan_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Remaining loan balance
-    tenure = models.ForeignKey(LoanTenure, on_delete=models.PROTECT)
+    # tenure = models.ForeignKey(LoanTenure, on_delete=models.PROTECT)
     purpose = models.TextField()
     guarantors = models.ManyToManyField('Guarantor', blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='under_review')

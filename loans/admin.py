@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Loan, LoanApplication, LoanTransaction, LoanPlan, LoanTenure, Guarantor
+from .models import Loan, LoanApplication, LoanTransaction, LoanPlan, Guarantor, LoanPlanType
 
 # Register your models here.
 
@@ -25,29 +25,29 @@ class LoanAdmin(admin.ModelAdmin):
 
 @admin.register(LoanApplication)
 class LoanApplicationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'loan_amount', 'status', 'application_date', 'application_fee', 'loan_plan', 'tenure', 'purpose', 'has_paid')
+    list_display = ('user', 'loan_amount', 'status', 'application_date', 'plan_type', 'purpose')
     list_filter = ('status', 'application_date')
     search_fields = ('user__first_name', 'user__last_name', 'user__username')
     readonly_fields = ('application_date',)
     fieldsets = (
         (None, {
-            'fields': ('user', 'loan_plan', 'loan_amount', 'loan_balance', 'purpose', 'status', 'guarantors')
+            'fields': ('user', 'plan_type', 'loan_amount', 'purpose', 'status')
         }),
         ('Review Information', {
-            'fields': ('reviewed_by', 'review_date', 'review_notes'),
+            'fields': ('review_notes',),
             'classes': ('collapse',)
         }),
     )
 
 
-@admin.register(LoanTenure)
-class LoanTenureAdmin(admin.ModelAdmin):
-    list_display = ('plan_type', 'months', 'interest_rate',)
-    list_filter = ('plan_type', )
-    search_fields = ('plan_type',)
+@admin.register(LoanPlanType)
+class LoanPlanTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'display_name', 'description', 'minimum_duration_months', 'min_amount', 'max_amount', 'default_interest_rate', 'processing_fee_percentage', 'requirements', 'min_credit_score', 'min_membership_duration', 'guarantors_required', 'is_active')
+    list_filter = ('is_active', 'min_amount', 'max_amount')
+    search_fields = ('name', 'display_name', 'description')
     fieldsets = (
         (None, {
-            'fields': ('plan_type', 'months', 'interest_rate')
+            'fields': ('name', 'display_name', 'description', 'minimum_duration_months', 'min_amount', 'max_amount', 'default_interest_rate', 'processing_fee_percentage', 'requirements', 'min_credit_score', 'min_membership_duration', 'guarantors_required', 'is_active')
         }),
 
     )
@@ -55,10 +55,9 @@ class LoanTenureAdmin(admin.ModelAdmin):
 @admin.register(LoanPlan)
 class LoanPlanAdmin(admin.ModelAdmin):
     exclude = ('created_at', 'updated_at')
-    list_display = ('plan_type', 'loan_tenure', 'min_amount', 'max_amount', )
-    list_filter = ('plan_type', )
-    search_fields = ('plan_type', 'loan_tenure__plan_type')
-
+    list_display = ('user', 'plan_type', 'amount', 'min_amount', 'max_amount')
+    list_filter = ('plan_type', 'created_at')
+    search_fields = ('user__username', 'plan_type__name')
 
 @admin.register(LoanTransaction)
 class LoanTransactionAdmin(admin.ModelAdmin):

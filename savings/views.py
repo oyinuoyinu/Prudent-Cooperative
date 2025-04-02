@@ -73,7 +73,11 @@ class SavingsPlanDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        context['plan_type_details'] = {
+            'minimum_balance': self.object.plan_type.minimum_balance,
+            'interest_rate': self.object.plan_type.default_interest_rate,
+            'maturity_date': self.object.maturity_date,
+        }
         # Calculate interest
         context['interest_earned'] = self.object.calculate_interest()
         # Get payment account details
@@ -109,36 +113,72 @@ class SavingsPlanDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+# class CreateSavingsPlanView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+#     model = SavingsPlan
+#     template_name = 'savings/create_plan.html'
+#     fields = ['plan_type']
+#     success_url = reverse_lazy('savings:plans_list')
+#     success_message = "Your savings plan has been created successfully!"
+
+#     def get_form(self, form_class=None):
+#         form = super().get_form(form_class)
+#         # Only show plan types that have payment accounts
+#         available_plans = PaymentAccount.objects.values_list('plan_type', flat=True)
+#         form.fields['plan_type'].choices = [
+#             choice for choice in form.fields['plan_type'].choices
+#             if choice[0] in available_plans
+#         ]
+#         return form
+
+#     def form_valid(self, form):
+#         try:
+#             form.instance.user = self.request.user
+#             # Get corresponding payment account
+#             form.instance.payment_account = PaymentAccount.objects.get(
+#                 plan_type=form.instance.plan_type
+#             )
+#             return super().form_valid(form)
+#         except PaymentAccount.DoesNotExist:
+#             messages.error(self.request, "This savings plan type is currently unavailable. Please contact admin.")
+#             return self.form_invalid(form)
+
 class CreateSavingsPlanView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = SavingsPlan
     template_name = 'savings/create_plan.html'
-    fields = ['plan_type']
+    form_class = SavingsPlanForm
     success_url = reverse_lazy('savings:plans_list')
     success_message = "Your savings plan has been created successfully!"
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Only show plan types that have payment accounts
-        available_plans = PaymentAccount.objects.values_list('plan_type', flat=True)
-        form.fields['plan_type'].choices = [
-            choice for choice in form.fields['plan_type'].choices
-            if choice[0] in available_plans
-        ]
-        return form
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Only show active plan types that have payment accounts
+        context['available_plans'] = SavingsPlanType.objects.filter(
+            is_active=True,
+            payment_accounts__isnull=False
+        ).distinct()
+        return context
 
     def form_valid(self, form):
         try:
             form.instance.user = self.request.user
+            plan_type = form.cleaned_data['plan_type']
+
             # Get corresponding payment account
-            form.instance.payment_account = PaymentAccount.objects.get(
-                plan_type=form.instance.plan_type
-            )
+            payment_account = PaymentAccount.objects.filter(
+                plan_type=plan_type,
+            ).first()
+
+            if not payment_account:
+                messages.error(self.request, "This savings plan type is currently unavailable. Please contact admin.")
+                return self.form_invalid(form)
+
+            form.instance.payment_account = payment_account
+            form.instance.interest_rate = plan_type.default_interest_rate
+
             return super().form_valid(form)
-        except PaymentAccount.DoesNotExist:
-            messages.error(self.request, "This savings plan type is currently unavailable. Please contact admin.")
+        except Exception as e:
+            messages.error(self.request, f"Error creating savings plan: {str(e)}")
             return self.form_invalid(form)
-
-
 
 class CreateDepositView(LoginRequiredMixin, CreateView):
     model = SavingsTransaction

@@ -5,8 +5,8 @@ from django.utils import timezone
 import logging
 
 from .models import MembershipApplication, Member, PaymentVerification
-from loans.models import LoanPlan, LoanTenure
-from savings.models import SavingsPlan, PaymentAccount
+from loans.models import LoanPlan, LoanPlanType
+from savings.models import SavingsPlan, PaymentAccount, SavingsPlanType
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -91,66 +91,49 @@ def handle_member_creation(sender, instance, created, **kwargs):
         with transaction.atomic():
             # Only create plans if this is a new member
             if created:
-                # Create loan plans for each loan type
-                for loan_type, _ in LoanPlan.PLAN_TYPES:
+                # Create loan plans for each active loan type
+                for loan_type in LoanPlanType.objects.filter(is_active=True):
                     try:
                         # Check if plan already exists
                         if not LoanPlan.objects.filter(user=instance.user, plan_type=loan_type).exists():
-                            logger.info(f"Creating {loan_type} loan plan for user {instance.user.username}")
-                            # Get default tenure for this loan type
-                            default_tenure = LoanTenure.objects.filter(plan_type=loan_type).first()
-                            if not default_tenure:
-                                logger.warning(f"No default tenure found for {loan_type}. Skipping plan creation.")
-                                continue
+                            logger.info(f"Creating {loan_type.display_name} loan plan for user {instance.user.username}")
 
                             LoanPlan.objects.create(
                                 user=instance.user,
                                 plan_type=loan_type,
-                                min_amount=0,  # These will be set by admin later
-                                max_amount=0,  # These will be set by admin later
-                                description=f"Default {loan_type.replace('_', ' ').title()} Plan",
-                                requirements="Please contact admin for loan requirements",
-                                loan_tenure=default_tenure  # Required field
+                                min_amount=loan_type.min_amount,
+                                max_amount=loan_type.max_amount,
+                                description=loan_type.description
                             )
-                            logger.info(f"Successfully created {loan_type} loan plan for user {instance.user.username}")
-                        else:
-                            logger.info(f"Loan plan {loan_type} already exists for user {instance.user.username}")
+                            logger.info(f"Created {loan_type.display_name} loan plan")
                     except Exception as e:
-                        logger.error(f"Error creating {loan_type} loan plan for user {instance.user.username}: {str(e)}")
-                        logger.exception(e)
+                        logger.error(f"Error creating {loan_type.display_name} loan plan: {str(e)}")
 
-                # Create savings plans for each savings type
-                for plan_type, _ in SavingsPlan.PLAN_CHOICES:
+                # Create savings plans for each active savings type
+                for savings_type in SavingsPlanType.objects.filter(is_active=True):
                     try:
                         # Check if plan already exists
-                        if not SavingsPlan.objects.filter(user=instance.user, plan_type=plan_type).exists():
-                            logger.info(f"Creating {plan_type} savings plan for user {instance.user.username}")
-                            # Get payment account for this plan type
-                            payment_account = PaymentAccount.objects.filter(plan_type=plan_type).first()
-                            if not payment_account:
-                                logger.warning(f"No payment account found for {plan_type}. Skipping plan creation.")
-                                continue
+                        if not SavingsPlan.objects.filter(user=instance.user, plan_type=savings_type).exists():
+                            logger.info(f"Creating {savings_type.display_name} savings plan for user {instance.user.username}")
 
                             SavingsPlan.objects.create(
                                 user=instance.user,
-                                plan_type=plan_type,
-                                amount=0,  # Initial amount
-                                payment_account=payment_account,  # Required field
-                                status='active',
-                                maturity_date=timezone.now().date() + timezone.timedelta(days=730)  # 2 years restriction
+                                plan_type=savings_type,
+                                amount=0,
+                                target_amount=savings_type.min_amount,
+                                description=savings_type.description
                             )
-                            logger.info(f"Successfully created {plan_type} savings plan for user {instance.user.username}")
-                        else:
-                            logger.info(f"Savings plan {plan_type} already exists for user {instance.user.username}")
+                            logger.info(f"Created {savings_type.display_name} savings plan")
                     except Exception as e:
-                        logger.error(f"Error creating {plan_type} savings plan for user {instance.user.username}: {str(e)}")
-                        logger.exception(e)
+                        logger.error(f"Error creating {savings_type.display_name} savings plan: {str(e)}")
+
+                # Create payment account if it doesn't exist
+                PaymentAccount.objects.get_or_create(
+                    user=instance.user,
+                    defaults={'balance': 0}
+                )
+                logger.info(f"Created payment account for user {instance.user.username}")
+
     except Exception as e:
-        logger.error(f"Error handling member creation for {instance.membership_number}: {str(e)}")
-        logger.exception(e)
-
-
-
-
-
-
+        logger.error(f"Error in handle_member_creation for {instance.membership_number}: {str(e)}")
+        raise

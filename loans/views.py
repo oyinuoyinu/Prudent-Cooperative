@@ -19,7 +19,7 @@ from decimal import Decimal
 from .utils import check_loan_eligibility
 from .models import (
     LoanPlan, LoanApplication, Loan, LoanTransaction,
-    Guarantor, LoanTenure
+    Guarantor, LoanPlanType
 )
 from .forms import (
     LoanApplicationForm, GuarantorForm, LoanRepaymentForm, LoanApplicationForm2,LoanForm, LoanTransactionForm
@@ -147,12 +147,12 @@ class LoanPlanDetailView(LoginRequiredMixin, DetailView):
         context['pending_transactions'] = loan_transactions.filter(status='pending').count()
 
         # Add plan type for template display
-        context['plan_type'] = plan.plan_type
+        context['plan_type'] = plan.plan_type.name
 
         # Get pending loan applications
         context['pending_applications'] = LoanApplication.objects.filter(
             user=self.request.user,
-            loan_plan__plan_type=plan.plan_type,
+            loan_plan__plan_type=plan.plan_type.name,
             status='under_review'
         ).count()
 
@@ -160,21 +160,21 @@ class LoanPlanDetailView(LoginRequiredMixin, DetailView):
         if plan.plan_type == 'emergency':
             context['total_emergency_loans'] = Loan.objects.filter(
                 user=self.request.user,
-                loan_plan__plan_type=plan.plan_type,
+                loan_plan__plan_type=plan.plan_type.name,
                 status='active'
             ).aggregate(total=Sum('loan_amount'))['total'] or 0
 
         elif plan.plan_type == 'normal':
             context['total_normal_loans'] = Loan.objects.filter(
                 user=self.request.user,
-                loan_plan__plan_type=plan.plan_type,
+                loan_plan__plan_type=plan.plan_type.name,
                 status='active'
             ).aggregate(total=Sum('loan_amount'))['total'] or 0
 
         elif plan.plan_type == 'long_term':
             context['total_long_term_loans'] = Loan.objects.filter(
                 user=self.request.user,
-                loan_plan__plan_type=plan.plan_type,
+                loan_plan__plan_type=plan.plan_type.name,
                 status='active'
             ).aggregate(total=Sum('loan_amount'))['total'] or 0
 

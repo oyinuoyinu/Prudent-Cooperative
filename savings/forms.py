@@ -1,5 +1,5 @@
 from django import forms
-from .models import PaymentAccount, SavingsPlan, SavingsTransaction
+from .models import PaymentAccount, SavingsPlan, SavingsTransaction, SavingsPlanType
 
 class PaymentAccountForm(forms.ModelForm):
     class Meta:
@@ -12,6 +12,11 @@ class PaymentAccountForm(forms.ModelForm):
             'bank_name': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show active plan types
+        self.fields['plan_type'].queryset = SavingsPlanType.objects.filter(is_active=True)
+
 class SavingsPlanForm(forms.ModelForm):
     class Meta:
         model = SavingsPlan
@@ -22,6 +27,16 @@ class SavingsPlanForm(forms.ModelForm):
             'interest_rate': forms.NumberInput(attrs={'class': 'form-control'}),
             'maturity_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show active plan types that have payment accounts
+        self.fields['plan_type'].queryset = SavingsPlanType.objects.filter(
+            is_active=True,
+            payment_accounts__isnull=False
+        ).distinct()
+
+        # Add help text
+        self.fields['plan_type'].help_text = "Select a savings plan type. Each plan type has different interest rates and minimum balance requirements."
 
 class SavingsTransactionForm(forms.ModelForm):
     class Meta:
@@ -104,3 +119,31 @@ class CreateWithdrawalForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'description': forms.TextInput(attrs={'class': 'form-control'})
         }
+    def __init__(self, *args, **kwargs):
+        self.savings_plan = kwargs.pop('savings_plan', None)
+        super().__init__(*args, **kwargs)
+        if self.savings_plan:
+            self.fields['amount'].help_text = (
+                f"Available balance: ₦{self.savings_plan.amount:,.2f}<br>"
+                f"Minimum balance required: ₦{self.savings_plan.plan_type.minimum_balance:,.2f}"
+            )
+
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+        if not self.savings_plan:
+            raise ValidationError("No savings plan specified")
+
+        if amount <= 0:
+            raise ValidationError("Amount must be greater than zero")
+
+        if amount > self.savings_plan.amount:
+            raise ValidationError("Withdrawal amount exceeds available balance")
+
+        remaining_balance = self.savings_plan.amount - amount
+        if remaining_balance < self.savings_plan.plan_type.minimum_balance:
+            raise ValidationError(
+                f"Withdrawal would put balance below minimum required balance of "
+                f"₦{self.savings_plan.plan_type.minimum_balance:,.2f}"
+            )
+
+        return amount

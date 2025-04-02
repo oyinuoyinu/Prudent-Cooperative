@@ -1,5 +1,5 @@
 from django import forms
-from .models import LoanApplication, Guarantor, LoanTransaction, Loan
+from .models import LoanApplication, Guarantor, LoanTransaction, Loan, LoanPlanType
 from django.forms import inlineformset_factory, formset_factory
 
 class GuarantorForm(forms.ModelForm):
@@ -38,6 +38,7 @@ class LoanApplicationForm(forms.ModelForm):
         fields = [
             'loan_amount',
             'purpose',
+            'plan_type',
         ]
         widgets = {
             'loan_amount': forms.NumberInput(attrs={
@@ -51,25 +52,31 @@ class LoanApplicationForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Explain the purpose of the loan'
             }),
+            'plan_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+
         }
 
-    def __init__(self, user, loan_plan, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         self.user = user
-        self.loan_plan = loan_plan
+        self.fields['plan_type'].queryset = LoanPlanType.objects.filter(is_active=True)
         super().__init__(*args, **kwargs)
 
     def clean_loan_amount(self):
         amount = self.cleaned_data['loan_amount']
-        if not self.loan_plan:
+        if not self.cleaned_data['plan_type']:
             raise forms.ValidationError("Loan plan is required")
 
-        if amount < self.loan_plan.min_amount:
-            raise forms.ValidationError(f"Amount cannot be less than ₦{self.loan_plan.min_amount:,.2f}")
+        if amount < self.cleaned_data['plan_type'].min_amount:
+            raise forms.ValidationError(f"Amount cannot be less than ₦{self.cleaned_data['plan_type'].min_amount:,.2f}")
 
-        if amount > self.loan_plan.max_amount:
-            raise forms.ValidationError(f"Amount cannot exceed ₦{self.loan_plan.max_amount:,.2f}")
+        if amount > self.cleaned_data['plan_type'].max_amount:
+            raise forms.ValidationError(f"Amount cannot exceed ₦{self.cleaned_data['plan_type'].max_amount:,.2f}")
 
         return amount
+
+
 
 GuarantorFormSet = formset_factory(
     GuarantorForm,
@@ -143,13 +150,30 @@ class LoanApplicationForm2(forms.ModelForm):
     class Meta:
         model = LoanApplication
         fields = [
-            'loan_plan', 'loan_amount', 'tenure',
+            'plan_type', 'loan_amount',
             'purpose', 'status', 'review_notes'
         ]
         widgets = {
-            'purpose': forms.Textarea(attrs={'rows': 3}),
-            'review_notes': forms.Textarea(attrs={'rows': 3}),
+            'plan_type': forms.Select(attrs={'class': 'form-control'}),
+            'loan_amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '0.01'
+            }),
+            'purpose': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3
+            }),
+            'review_notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3
+            }),
+            'status': forms.Select(attrs={'class': 'form-control'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['plan_type'].queryset = LoanPlanType.objects.filter(is_active=True)
 
 class LoanTransactionForm(forms.ModelForm):
     class Meta:
