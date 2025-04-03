@@ -270,20 +270,26 @@ Monthly Loans: {{ monthly_loans }}
 
 {% block script %}
 <script>
-// Get the data from Django context
+// Parse the data from Django context
 const monthlyLabels = {{ monthly_labels|safe }};
-const monthlySavings = {{ monthly_savings|safe }};
-const monthlyLoans = {{ monthly_loans|safe }};
+const monthlySavings = {{ monthly_savings|safe }}.map(Number);  // Convert strings to numbers
+const monthlyLoans = {{ monthly_loans|safe }}.map(Number);  // Convert strings to numbers
+const savingsTypes = {{ savings_types|safe }};
+const savingsAmounts = {{ savings_amounts|safe }}.map(Number);  // Convert strings to numbers
 
+{% if debug %}
 console.log("Chart Data:", {
     labels: monthlyLabels,
     savings: monthlySavings,
-    loans: monthlyLoans
+    loans: monthlyLoans,
+    savingsTypes: savingsTypes,
+    savingsAmounts: savingsAmounts
 });
+{% endif %}
 
 // Monthly Overview Bar Chart
 const monthlyOverviewCtx = document.getElementById('monthlyOverviewChart').getContext('2d');
-const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
+new Chart(monthlyOverviewCtx, {
     type: 'bar',
     data: {
         labels: monthlyLabels,
@@ -304,6 +310,7 @@ const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 beginAtZero: true,
@@ -328,13 +335,10 @@ const monthlyOverviewChart = new Chart(monthlyOverviewCtx, {
 
 // Savings Distribution Chart
 const savingsCtx = document.getElementById('savingsDistributionChart').getContext('2d');
-const savingsTypes = JSON.parse('{{ savings_types|safe }}');
-const savingsAmounts = JSON.parse('{{ savings_amounts|safe }}');
-
 new Chart(savingsCtx, {
     type: 'doughnut',
     data: {
-        labels: savingsTypes.map(s => s.display_name),
+        labels: savingsTypes,
         datasets: [{
             data: savingsAmounts,
             backgroundColor: [
@@ -352,7 +356,8 @@ new Chart(savingsCtx, {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                display: true
             },
             title: {
                 display: true,
@@ -364,15 +369,15 @@ new Chart(savingsCtx, {
 
 // Loan Progress Donut Chart
 const loanProgressCtx = document.getElementById('loanProgressChart').getContext('2d');
-const loanProgressChart = new Chart(loanProgressCtx, {
+new Chart(loanProgressCtx, {
     type: 'doughnut',
     data: {
         labels: ['Paid', 'Remaining'],
         datasets: [{
-            data: [{{ loan_paid }}, {{ loan_remaining }}],
+            data: [{{ loan_paid }}, {{ loan_remaining }}].map(Number),  // Convert to numbers
             backgroundColor: [
-                'rgba(25, 135, 84, 0.2)',
-                'rgba(220, 53, 69, 0.2)'
+                'rgba(25, 135, 84, 0.8)',
+                'rgba(220, 53, 69, 0.8)'
             ],
             borderColor: [
                 'rgba(25, 135, 84, 1)',
@@ -383,9 +388,11 @@ const loanProgressChart = new Chart(loanProgressCtx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'bottom',
+                display: true
             },
             title: {
                 display: true,

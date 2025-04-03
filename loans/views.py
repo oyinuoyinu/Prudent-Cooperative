@@ -1,13 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView, View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy, reverse
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils import timezone
-from django.db.models import Sum, Count, Q
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.db import transaction
+from django.db.models import Sum, F, Q
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView,
+    DeleteView, View, TemplateView
+)
 from decimal import Decimal
 import json
 import logging
@@ -15,7 +20,6 @@ from django.forms import formset_factory
 import requests
 from django.conf import settings
 from members.models import Member
-from decimal import Decimal
 from .utils import check_loan_eligibility
 from .models import (
     LoanPlan, LoanApplication, Loan, LoanTransaction,
@@ -26,6 +30,11 @@ from .forms import (
 )
 
 logger = logging.getLogger(__name__)
+
+class AdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Mixin to require that a user is both logged in and is an admin"""
+    def test_func(self):
+        return self.request.user.is_staff
 
 # class LoanDashboardView(LoginRequiredMixin, ListView):
 #     """Dashboard view showing user's loans and applications"""
@@ -428,7 +437,6 @@ class GuarantorCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return reverse('loans:application_detail',
                       kwargs={'pk': self.kwargs.get('application_pk')})
 
-
 class LoanRepaymentView(LoginRequiredMixin, CreateView):
     model = LoanTransaction
     template_name = 'loans/loan_detail.html'
@@ -487,7 +495,6 @@ class LoanRepaymentView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('loans:loan_detail', kwargs={'pk': self.kwargs['pk']})
-
 
 # class LoanRepaymentCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 #     """View to create a loan repayment"""
@@ -640,12 +647,24 @@ class PaystackOnlineLoanPaymentView(LoginRequiredMixin, View):
         application = get_object_or_404(LoanApplication, id=pk, user=request.user)
 
         # Fixed application fee amount
-        amount = 1500  # ₦1,500 application fee
+        # amount = 1500  # ₦1,500 application fee
 
         try:
-            amount_in_kobo = int(float(amount) * 100)  # Convert to kobo
+            # Fixed application fee amount for now
+            # TODO: Implement dynamic fee calculation based on plan type:
+            # plan_type = application.plan_type
+            # if not plan_type:
+            #     return JsonResponse({
+            #         'status': 'error',
+            #         'message': 'No loan plan type specified'
+            #     }, status=400)
+            # amount = (plan_type.processing_fee_percentage * application.loan_amount) / Decimal('100.0')
+
+            amount = Decimal('1500')  # Fixed ₦1,500 application fee
+            amount_in_kobo = int(amount * 100)  # Convert to kobo
 
             # Initialize Paystack transaction
+
             url = 'https://api.paystack.co/transaction/initialize'
             headers = {
                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
@@ -728,21 +747,30 @@ class PaystackOnlineLoanCallbackView(LoginRequiredMixin, View):
 
 
 # Admin Views
-class AdminLoanApplicationListView(UserPassesTestMixin, LoginRequiredMixin, ListView):
+class AdminLoanApplicationListView(AdminRequiredMixin, ListView):
     """Admin view to list all loan applications"""
     model = LoanApplication
     template_name = 'loans/admin/applications_list.html'
     context_object_name = 'applications'
     paginate_by = 20
-
-    def test_func(self):
-        return self.request.user.is_staff
+    ordering = ['-application_date']  # Add default ordering
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         status = self.request.GET.get('status')
+
+        # Add select_related for better performance
+        queryset = queryset.select_related(
+            'user',
+            'loan_plan',
+            'plan_type',
+            'reviewed_by'
+        )
+
         if status:
-            return LoanApplication.objects.filter(status=status).order_by('-application_date')
-        return LoanApplication.objects.all().order_by('-application_date')
+            queryset = queryset.filter(status=status)
+
+        return queryset
 
 class AdminLoanApplicationDetailView(UserPassesTestMixin, LoginRequiredMixin, DetailView):
     """Admin view to review loan applications"""
@@ -836,11 +864,6 @@ class DownloadReceiptView(LoginRequiredMixin, View):
 #######################################################
 
 
-class AdminRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.role == 2
-
-# Loan Views
 class AdminLoanListView(AdminRequiredMixin, ListView):
     model = Loan
     template_name = 'loans/admin/admin_loan_list.html'
@@ -891,13 +914,24 @@ class AdminLoanApplicationListView(AdminRequiredMixin, ListView):
     template_name = 'loans/admin/loan_application_list.html'
     context_object_name = 'applications'
     paginate_by = 10
+    ordering = ['-application_date']  # Add default ordering
 
     def get_queryset(self):
         queryset = super().get_queryset()
         status = self.request.GET.get('status')
+
+        # Add select_related for better performance
+        queryset = queryset.select_related(
+            'user',
+            'loan_plan',
+            'plan_type',
+            'reviewed_by'
+        )
+
         if status:
             queryset = queryset.filter(status=status)
-        return queryset.select_related('user', 'loan_plan', 'tenure')
+
+        return queryset
 
 class AdminLoanApplicationDetailView(AdminRequiredMixin, DetailView):
     model = LoanApplication

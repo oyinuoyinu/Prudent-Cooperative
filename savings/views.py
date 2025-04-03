@@ -21,7 +21,9 @@ from django.utils import timezone
 from django.http import FileResponse
 from .utils import generate_savings_receipt_pdf
 from django.contrib.auth.mixins import UserPassesTestMixin
-
+import uuid
+from django.db import transaction
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 # Set up logger
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,7 @@ class SavingsPlansListView(LoginRequiredMixin, ListView):
     model = SavingsPlan
     template_name = 'savings/plans_list.html'
     context_object_name = 'savings_plans'
+    paginate_by = 20  # Add pagination for transactions
 
     def get_queryset(self):
         try:
@@ -72,11 +75,17 @@ class SavingsPlansListView(LoginRequiredMixin, ListView):
 
             context['total_interest'] = total_interest
 
-            # Get recent transactions
-            context['recent_transactions'] = SavingsTransaction.objects.filter(
-                savings_plan__user=self.request.user,
-                status='approved'
-            ).select_related('savings_plan').order_by('-transaction_date')[:10]
+            # Get all user transactions with pagination
+            transactions = SavingsTransaction.objects.filter(
+                savings_plan__user=self.request.user
+            ).select_related('savings_plan').order_by('-transaction_date')
+
+            paginator = Paginator(transactions, self.paginate_by)
+            page = self.request.GET.get('page')
+            context['user_transactions'] = paginator.get_page(page)
+
+            # Count pending transactions
+            context['pending_transactions'] = transactions.filter(status='pending').count()
 
             return context
         except Exception as e:
@@ -271,39 +280,140 @@ class CreateDepositView(LoginRequiredMixin, CreateView):
         return reverse('savings:plan_details', kwargs={'pk': self.kwargs['pk']})
 
 
+# class PaystackDepositView(LoginRequiredMixin, View):
+#     def post(self, request, pk):
+#         plan = get_object_or_404(SavingsPlan, id=pk, user=request.user)
+#         # amount = request.POST.get('amount')
+
+#         try:
+#             data = json.loads(request.body)
+#             amount = data.get('amount')
+#             # Convert amount to kobo (Paystack uses kobo)
+#             amount_in_kobo = int(float(amount) * 100)
+
+#             # Payment description including bank details
+#             payment_description = (
+#                 f"Deposit to {plan.get_plan_type_display()} Savings Plan - "
+#                 f"Bank: {plan.payment_account.bank_name}, "
+#                 f"Account: {plan.payment_account.account_name}, "
+#                 f"Number: {plan.payment_account.account_number}"
+#             )
+
+#             # Initialize Paystack transaction
+#             url = 'https://api.paystack.co/transaction/initialize'
+#             headers = {
+#                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
+#                 'Content-Type': 'application/json'
+#             }
+#             data = {
+#                 'email': request.user.email,
+#                 'amount': amount_in_kobo,
+#                 'callback_url': request.build_absolute_uri(reverse('savings:paystack_callback')),
+#                 'reference': f"DEP-{plan.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+#                 'metadata': {
+#                     'plan_id': plan.id,
+#                     'plan_type': plan.plan_type,
+#                     'payment_account': {
+#                         'bank': plan.payment_account.bank_name,
+#                         'name': plan.payment_account.account_name,
+#                         'number': plan.payment_account.account_number
+#                     }
+#                 },
+#                 'description': payment_description
+#             }
+
+#             response = requests.post(url, headers=headers, json=data)
+#             response_data = response.json()
+
+#             if response_data['status']:
+#                 return JsonResponse({
+#                     'status': 'success',
+#                     'authorization_url': response_data['data']['authorization_url']
+#                 })
+#             else:
+#                 return JsonResponse({
+#                     'status': 'error',
+#                     'message': 'Could not initialize payment'
+#                 }, status=400)
+
+#         except Exception as e:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': str(e)
+#             }, status=400)
+
+
 class PaystackDepositView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        plan = get_object_or_404(SavingsPlan, id=pk, user=request.user)
-        # amount = request.POST.get('amount')
-
         try:
-            data = json.loads(request.body)
-            amount = data.get('amount')
-            # Convert amount to kobo (Paystack uses kobo)
-            amount_in_kobo = int(float(amount) * 100)
+            # Validate plan exists and belongs to user
+            plan = get_object_or_404(
+                SavingsPlan,
+                id=pk,
+                user=request.user,
+                status='active'
+            )
 
-            # Payment description including bank details
+            # Parse and validate request data
+            try:
+                data = json.loads(request.body)
+                amount = data.get('amount')
+                if not amount:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Amount is required'
+                    }, status=400)
+
+                # Validate amount is numeric and positive
+                amount = Decimal(str(amount))
+                if amount <= 0:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Amount must be greater than 0'
+                    }, status=400)
+
+                # Convert to kobo (Paystack uses kobo)
+                amount_in_kobo = int(amount * 100)
+
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Invalid amount format'
+                }, status=400)
+
+            # Validate Paystack configuration
+            if not all([settings.PAYSTACK_SECRET_KEY, settings.PAYSTACK_BASE_URL]):
+                logger.error("Paystack configuration missing")
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Payment service configuration error'
+                }, status=500)
+
+            # Generate unique reference
+            reference = f"DEP-{plan.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:4]}"
+
+            # Payment description
             payment_description = (
-                f"Deposit to {plan.get_plan_type_display()} Savings Plan - "
+                f"Deposit to {plan.plan_type.display_name} - "
                 f"Bank: {plan.payment_account.bank_name}, "
-                f"Account: {plan.payment_account.account_name}, "
-                f"Number: {plan.payment_account.account_number}"
+                f"Account: {plan.payment_account.account_name}"
             )
 
             # Initialize Paystack transaction
-            url = 'https://api.paystack.co/transaction/initialize'
             headers = {
                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
                 'Content-Type': 'application/json'
             }
-            data = {
+
+            payload = {
                 'email': request.user.email,
                 'amount': amount_in_kobo,
                 'callback_url': request.build_absolute_uri(reverse('savings:paystack_callback')),
-                'reference': f"DEP-{plan.id}-{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                'reference': reference,
                 'metadata': {
                     'plan_id': plan.id,
-                    'plan_type': plan.plan_type,
+                    'plan_type': plan.plan_type.name,
+                    'user_id': request.user.id,
                     'payment_account': {
                         'bank': plan.payment_account.bank_name,
                         'name': plan.payment_account.account_name,
@@ -313,85 +423,223 @@ class PaystackDepositView(LoginRequiredMixin, View):
                 'description': payment_description
             }
 
-            response = requests.post(url, headers=headers, json=data)
-            response_data = response.json()
+            # Make request to Paystack
+            try:
+                response = requests.post(
+                    f"{settings.PAYSTACK_BASE_URL}/transaction/initialize",
+                    headers=headers,
+                    json=payload,
+                    timeout=30
+                )
+                response.raise_for_status()
+                response_data = response.json()
 
-            if response_data['status']:
-                return JsonResponse({
-                    'status': 'success',
-                    'authorization_url': response_data['data']['authorization_url']
-                })
-            else:
+            except requests.RequestException as e:
+                logger.error(f"Paystack API error: {str(e)}")
                 return JsonResponse({
                     'status': 'error',
-                    'message': 'Could not initialize payment'
-                }, status=400)
+                    'message': 'Unable to initialize payment. Please try again.'
+                }, status=503)
+
+            if not response_data.get('status'):
+                logger.error(f"Payment verification failed. Status: {response_data.get('data', {}).get('status')}")
+                messages.error(request, 'Payment verification failed. Please try again or contact support.')
+                return redirect('savings:plans_list')
+
+            # Log successful initialization
+            logger.info(
+                f"Payment initialized - Amount: ₦{amount:,.2f}, "
+                f"Reference: {reference}, Plan: {plan.plan_type.name}"
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'authorization_url': response_data['data']['authorization_url'],
+                'reference': reference
+            })
 
         except Exception as e:
+            logger.error(f"Unexpected error in PaystackDepositView: {str(e)}")
             return JsonResponse({
                 'status': 'error',
-                'message': str(e)
-            }, status=400)
+                'message': 'An unexpected error occurred'
+            }, status=500)
+
+# class PaystackCallbackView(LoginRequiredMixin, View):
+#     def get(self, request):
+#         reference = request.GET.get('reference')
+#         logger.info(f"Received Paystack callback for reference: {reference}")
+
+#         try:
+#             # Verify transaction
+#             url = f'https://api.paystack.co/transaction/verify/{reference}'
+#             headers = {
+#                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'
+#             }
+#             response = requests.get(url, headers=headers)
+#             response_data = response.json()
+
+#             logger.info(f"Paystack verification response: {response_data}")
+
+#             if response_data['status'] and response_data['data']['status'] == 'success':
+#                 # Extract plan_id from reference
+#                 try:
+#                     ref_parts = reference.split('-')
+#                     plan_id = int(ref_parts[1])
+#                     plan = SavingsPlan.objects.get(id=plan_id)
+#                 except (IndexError, ValueError, SavingsPlan.DoesNotExist) as e:
+#                     logger.error(f"Error extracting plan_id from reference: {str(e)}")
+#                     messages.error(request, 'Invalid transaction reference. Please contact support.')
+#                     return redirect('savings:plans_list')
+
+#                 try:
+#                     # Convert amount from kobo to Naira and ensure it's a decimal
+#                     amount = Decimal(str(response_data['data']['amount'])) / Decimal('100')
+
+#                     # Create transaction record
+#                     transaction = SavingsTransaction.objects.create(
+#                         savings_plan=plan,
+#                         transaction_type='deposit',
+#                         amount=amount,
+#                         status='approved',  # Auto-approve online payments
+#                         reference_number=reference,
+#                         description=f'Online payment via Paystack - {reference}',
+#                         approval_date=timezone.now()
+#                     )
+
+#                     logger.info(f"Successfully created transaction: {transaction.id} for plan: {plan_id}")
+#                     messages.success(request, f'Payment successful! Your deposit of ₦{amount:,.2f} has been processed.')
+#                     return redirect('savings:plan_details', pk=plan_id)
+
+#                 except (ValueError, Decimal.InvalidOperation) as e:
+#                     logger.error(f"Error processing amount: {str(e)}")
+#                     messages.error(request, 'Error processing payment amount. Please contact support.')
+#                     return redirect('savings:plans_list')
+
+#             else:
+#                 logger.error(f"Payment verification failed. Status: {response_data.get('data', {}).get('status')}")
+#                 messages.error(request, 'Payment verification failed. Please try again or contact support.')
+#                 return redirect('savings:plans_list')
+
+#         except Exception as e:
+#             logger.error(f"Error in PaystackCallbackView: {str(e)}")
+#             messages.error(request, f'Error processing payment: {str(e)}')
+#             return redirect('savings:plans_list')
+
 
 class PaystackCallbackView(LoginRequiredMixin, View):
     def get(self, request):
         reference = request.GET.get('reference')
+
+        if not reference:
+            messages.error(request, 'No transaction reference provided')
+            return redirect('savings:plans_list')
+
         logger.info(f"Received Paystack callback for reference: {reference}")
 
         try:
-            # Verify transaction
-            url = f'https://api.paystack.co/transaction/verify/{reference}'
+            # Extract plan_id from reference
+            try:
+                plan_id = int(reference.split('-')[1])
+            except (IndexError, ValueError) as e:
+                logger.error(f"Invalid reference format: {str(e)}")
+                messages.error(request, 'Invalid transaction reference format')
+                return redirect('savings:plans_list')
+
+            # Verify plan exists and belongs to user
+            try:
+                plan = SavingsPlan.objects.get(
+                    id=plan_id,
+                    user=request.user,
+                    status='active'
+                )
+            except SavingsPlan.DoesNotExist:
+                logger.error(f"Plan not found or unauthorized: {plan_id}")
+                messages.error(request, 'Invalid savings plan or unauthorized access')
+                return redirect('savings:plans_list')
+
+            # Check if transaction already exists
+            if SavingsTransaction.objects.filter(reference_number=reference).exists():
+                logger.warning(f"Duplicate transaction callback received: {reference}")
+                messages.warning(request, 'This transaction has already been processed')
+                return redirect('savings:plan_details', pk=plan_id)
+
+            # Verify transaction with Paystack
             headers = {
-                'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'
+                'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
+                'Content-Type': 'application/json'
             }
-            response = requests.get(url, headers=headers)
-            response_data = response.json()
 
-            logger.info(f"Paystack verification response: {response_data}")
+            try:
+                response = requests.get(
+                    f"{settings.PAYSTACK_BASE_URL}/transaction/verify/{reference}",
+                    headers=headers,
+                    timeout=30
+                )
+                response.raise_for_status()
+                response_data = response.json()
 
-            if response_data['status'] and response_data['data']['status'] == 'success':
-                # Extract plan_id from reference
-                try:
-                    ref_parts = reference.split('-')
-                    plan_id = int(ref_parts[1])
-                    plan = SavingsPlan.objects.get(id=plan_id)
-                except (IndexError, ValueError, SavingsPlan.DoesNotExist) as e:
-                    logger.error(f"Error extracting plan_id from reference: {str(e)}")
-                    messages.error(request, 'Invalid transaction reference. Please contact support.')
-                    return redirect('savings:plans_list')
+            except requests.RequestException as e:
+                logger.error(f"Paystack API error: {str(e)}")
+                messages.error(request, 'Unable to verify payment. Please try again later.')
+                return redirect('savings:plans_list')
 
-                try:
-                    # Convert amount from kobo to Naira and ensure it's a decimal
-                    amount = Decimal(str(response_data['data']['amount'])) / Decimal('100')
+            if not response_data.get('status'):
+                logger.error(f"Payment verification failed: {response_data.get('message')}")
+                messages.error(request, 'Payment verification failed. Please try again or contact support.')
+                return redirect('savings:plans_list')
 
-                    # Create transaction record
-                    transaction = SavingsTransaction.objects.create(
+            # Verify payment status
+            payment_status = response_data['data']['status']
+            if payment_status != 'success':
+                logger.warning(f"Payment not successful. Status: {payment_status}")
+                messages.warning(request, f'Payment {payment_status}. Please try again or contact support.')
+                return redirect('savings:plans_list')
+
+            try:
+                # Convert amount from kobo to Naira
+                amount_kobo = str(response_data['data']['amount'])
+                amount = Decimal(amount_kobo) / Decimal('100')
+
+                if amount <= 0:
+                    raise ValueError("Invalid amount")
+
+                # Create transaction in atomic transaction
+                with transaction.atomic():
+                    # Create transaction record with approved status
+                    # The signal handler will update the plan balance
+                    transaction_obj = SavingsTransaction.objects.create(
                         savings_plan=plan,
                         transaction_type='deposit',
                         amount=amount,
-                        status='approved',  # Auto-approve online payments
+                        status='approved',  # This will trigger the signal handler
                         reference_number=reference,
                         description=f'Online payment via Paystack - {reference}',
-                        approval_date=timezone.now()
+                        approval_date=timezone.now(),
+                        payment_method='paystack',
+                        payment_details={
+                            'paystack_reference': reference,
+                            'payment_channel': response_data['data'].get('channel'),
+                            'bank': response_data['data'].get('authorization', {}).get('bank'),
+                            'card_type': response_data['data'].get('authorization', {}).get('card_type')
+                        }
                     )
 
-                    logger.info(f"Successfully created transaction: {transaction.id} for plan: {plan_id}")
-                    messages.success(request, f'Payment successful! Your deposit of ₦{amount:,.2f} has been processed.')
+                    logger.info(f"Successfully processed transaction {reference} for plan {plan_id}")
+                    messages.success(
+                        request,
+                        f'Payment successful! Your deposit of ₦{amount:,.2f} has been processed.'
+                    )
                     return redirect('savings:plan_details', pk=plan_id)
 
-                except (ValueError, Decimal.InvalidOperation) as e:
-                    logger.error(f"Error processing amount: {str(e)}")
-                    messages.error(request, 'Error processing payment amount. Please contact support.')
-                    return redirect('savings:plans_list')
-
-            else:
-                logger.error(f"Payment verification failed. Status: {response_data.get('data', {}).get('status')}")
-                messages.error(request, 'Payment verification failed. Please contact support.')
+            except (ValueError, InvalidOperation) as e:
+                logger.error(f"Error processing amount: {str(e)}")
+                messages.error(request, 'Error processing payment amount')
                 return redirect('savings:plans_list')
 
         except Exception as e:
-            logger.error(f"Error in PaystackCallbackView: {str(e)}")
-            messages.error(request, f'Error processing payment: {str(e)}')
+            logger.error(f"Unexpected error in PaystackCallbackView: {str(e)}")
+            messages.error(request, 'An unexpected error occurred. Please contact support.')
             return redirect('savings:plans_list')
 
 

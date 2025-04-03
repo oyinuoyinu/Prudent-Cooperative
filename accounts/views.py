@@ -29,6 +29,7 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 import logging
 logger = logging.getLogger(__name__)
+from decimal import Decimal
 
 
 # Restrict the member from accessing the admin page
@@ -247,75 +248,79 @@ def memberDashboard(request):
             savings_amounts = []
             savings_data = []
 
-            # Calculate savings by type
+            # Calculate total savings and distribution
+            total_savings = Decimal('0')
             for plan_type in savings_types:
                 total = SavingsTransaction.objects.filter(
                     savings_plan__user=user,
                     savings_plan__plan_type=plan_type,
                     transaction_type='deposit',
                     status='approved'
-                ).aggregate(total=Sum('amount'))['total'] or 0
-                savings_amounts.append(float(total))
+                ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+                total_savings += total
+                savings_amounts.append(str(total))  # Convert to string to preserve decimal precision
                 savings_data.append({
                     'name': plan_type.display_name,
-                    'amount': float(total)
+                    'amount': str(total)  # Convert to string to preserve decimal precision
                 })
 
             # Calculate loan totals
             loans = Loan.objects.filter(user=user, status='active')
-            loan_balance = sum(loan.loan_balance for loan in loans)
-            loan_paid = sum(loan.total_paid for loan in loans)
-            loan_remaining = sum(loan.remaining_balance for loan in loans)
+            total_loans = sum((loan.amount or Decimal('0')) for loan in loans)
+            loan_balance = sum((loan.loan_balance or Decimal('0')) for loan in loans)
+            loan_paid = sum((loan.total_paid or Decimal('0')) for loan in loans)
+            loan_remaining = sum((loan.remaining_balance or Decimal('0')) for loan in loans)
 
-            # Get monthly data
+            # Get monthly data for the last 6 months
             today = timezone.now().date()
-            first_day = today.replace(day=1)
             months = []
             savings_monthly = []
             loans_monthly = []
 
-            # Get last 6 months of data
+            # Calculate month ranges
             for i in range(5, -1, -1):
-                current_date = first_day - timedelta(days=1)
-                first_day = current_date.replace(day=1)
+                month_start = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+                if i > 0:
+                    next_month = month_start.replace(day=28) + timedelta(days=4)  # This ensures we get to next month
+                    month_end = next_month - timedelta(days=next_month.day)
+                else:
+                    month_end = today
 
                 # Monthly savings
                 monthly_savings = SavingsTransaction.objects.filter(
                     savings_plan__user=user,
                     transaction_type='deposit',
                     status='approved',
-                    transaction_date__year=current_date.year,
-                    transaction_date__month=current_date.month
-                ).aggregate(total=Sum('amount'))['total'] or 0
+                    transaction_date__date__gte=month_start,
+                    transaction_date__date__lte=month_end
+                ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
                 # Monthly loan payments
                 monthly_loan = LoanTransaction.objects.filter(
                     loan__user=user,
                     transaction_type='repayment',
                     status='approved',
-                    payment_date__year=current_date.year,
-                    payment_date__month=current_date.month
-                ).aggregate(total=Sum('amount'))['total'] or 0
+                    payment_date__date__gte=month_start,
+                    payment_date__date__lte=month_end
+                ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
-                months.append(current_date.strftime('%B %Y'))
-                savings_monthly.append(float(monthly_savings))
-                loans_monthly.append(float(monthly_loan))
-
-            # Reverse lists to show oldest to newest
-            months.reverse()
-            savings_monthly.reverse()
-            loans_monthly.reverse()
+                months.append(month_start.strftime('%B %Y'))
+                savings_monthly.append(str(monthly_savings))  # Convert to string to preserve decimal precision
+                loans_monthly.append(str(monthly_loan))  # Convert to string to preserve decimal precision
 
             context = {
+                'total_savings': str(total_savings),
+                'total_loans': str(total_loans),
                 'monthly_labels': json.dumps(months),
                 'monthly_savings': json.dumps(savings_monthly),
                 'monthly_loans': json.dumps(loans_monthly),
-                'savings_types': json.dumps([plan_type.display_name for plan_type in savings_types]),
-                'savings_amounts': json.dumps([float(amount) for amount in savings_amounts]),
-                'savings_data': savings_data,
-                'loan_paid': float(loan_paid),
-                'loan_remaining': float(loan_remaining),
-                'loan_balance': float(loan_balance),
+                'savings_types': json.dumps([st.display_name for st in savings_types]),
+                'savings_amounts': json.dumps(savings_amounts),
+                'loan_paid': str(loan_paid),
+                'loan_remaining': str(loan_remaining),
+                'loan_balance': str(loan_balance),
+                'debug': True  # Add this temporarily to debug
             }
 
             return render(request, 'accounts/memberDashboard.html', context)

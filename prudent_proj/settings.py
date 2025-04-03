@@ -27,15 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++"
+# SECRET_KEY = "django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++"
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = True
-ALLOWED_HOSTS = ['*']
-# SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
-# DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-# ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative.onrender.com','localhost','127.0.0.1']
+# DEBUG = True
+# ALLOWED_HOSTS = ['*']
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
+DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative.onrender.com','localhost','127.0.0.1']
 
 # Application definition
 
@@ -145,10 +145,10 @@ if not DEBUG:
 
 
 # Security
-#CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -236,6 +236,7 @@ if DEBUG:
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 MEMBERSHIP_FEE = 5000
+PAYSTACK_BASE_URL = 'https://api.paystack.co'
 
 # Mono Settings
 
@@ -441,9 +442,8 @@ CSP_IMG_SRC = (
 
 
 
-
 DAISY_SETTINGS = {
-    'SITE_TITLE': 'Prudent Women Admin',  # The title of the site
+    'SITE_TITLE': 'WOF HoF Admin',  # The title of the site
     'SITE_HEADER': 'Administration',  # Header text displayed in the admin panel
     'INDEX_TITLE': 'Hi, welcome to your dashboard',  # The title for the index page of dashboard
     'SITE_LOGO': '/static/admin/img/daisyui-logomark.svg',  # Path to the logo image displayed in the sidebar

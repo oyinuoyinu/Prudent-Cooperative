@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 User = get_user_model()
 
 
@@ -102,9 +102,9 @@ class SavingsPlan(models.Model):
 
     def calculate_interest(self):
         """Calculate interest based on plan type."""
-        if self.plan_type == 'investment':
-            return self.amount * (self.interest_rate / 100)
-        return 0.00
+        if self.plan_type and self.plan_type.default_interest_rate > 0:
+            return self.amount * (Decimal(str(self.plan_type.default_interest_rate)) / Decimal('100'))
+        return Decimal('0.00')
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.plan_type.display_name}"
@@ -132,7 +132,26 @@ class SavingsTransaction(models.Model):
     approval_date = models.DateTimeField(null=True, blank=True)
     reference_number = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
+    payment_method = models.CharField(max_length=50, blank=True, null=True)
+    payment_details = models.JSONField(default=dict, blank=True)
 
+    # def save(self, *args, **kwargs):
+    #     if self.status == 'approved' and not self.approval_date:
+    #         self.approval_date = timezone.now()
+
+    #         if self.transaction_type == "withdrawal" and self.amount > self.savings_plan.amount:
+    #             raise ValueError("Withdrawal amount exceeds savings balance")
+
+    #         # Update the savings balance
+    #         if self.transaction_type == "deposit":
+    #             self.savings_plan.amount += self.amount
+    #         elif self.transaction_type == "withdrawal":
+    #             self.savings_plan.amount -= self.amount
+
+    #         self.savings_plan.last_transaction_date = timezone.now()
+    #         self.savings_plan.save()
+
+    #     super().save(*args, **kwargs)
     def save(self, *args, **kwargs):
         if self.status == 'approved' and not self.approval_date:
             self.approval_date = timezone.now()
@@ -142,14 +161,13 @@ class SavingsTransaction(models.Model):
 
             # Update the savings balance
             if self.transaction_type == "deposit":
-                self.savings_plan.amount += self.amount
+                self.savings_plan.amount = self.savings_plan.amount + Decimal(str(self.amount))
             elif self.transaction_type == "withdrawal":
-                self.savings_plan.amount -= self.amount
+                self.savings_plan.amount = self.savings_plan.amount - Decimal(str(self.amount))
 
             self.savings_plan.last_transaction_date = timezone.now()
             self.savings_plan.save()
 
         super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.transaction_type.capitalize()} - {self.amount} for {self.savings_plan.user.first_name} {self.savings_plan.user.last_name} - {self.savings_plan.plan_type.display_name}"
