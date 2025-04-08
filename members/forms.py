@@ -4,10 +4,10 @@ from .models import Member, MembershipApplication
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Field, Div, HTML, Submit
 
-phone_validator = RegexValidator(
-    regex=r'^\+?234?\d{10,11}$',
-    message="Phone number must be entered in the format: '+2341234567890'."
-)
+# phone_validator = RegexValidator(
+#     regex=r'^\+?234?\d{10,11}$',
+#     message="Phone number must be entered in the format: '+2341234567890'."
+# )
 
 class MemberForm(forms.ModelForm):
     class Meta:
@@ -18,7 +18,7 @@ class MemberForm(forms.ModelForm):
         }
 
 class MembershipApplicationForm(forms.ModelForm):
-    phone_number = forms.CharField(validators=[phone_validator])
+    phone_number = forms.CharField()
     date_of_birth = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
         help_text='Must be at least 18 years old'
