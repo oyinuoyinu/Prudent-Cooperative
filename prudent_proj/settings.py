@@ -35,7 +35,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ALLOWED_HOSTS = ['*']
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-^6rvrhs5-53cs$%(mg(8kk7jqsl!%q-m%_))n318@w_&$zrf++')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative.onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['*.onrender.com','mmswofhof-cooperative-1sc8.onrender.com','localhost','127.0.0.1']
 
 # Application definition
 
