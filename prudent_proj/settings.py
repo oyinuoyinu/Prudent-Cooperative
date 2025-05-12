@@ -35,7 +35,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ALLOWED_HOSTS = []
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='1dxpr)p0!=ldc1(!*a8zy$#&3%-@3rl$=aic$n()@y37)quudw')
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['app.prudentwomen.org', 'www.app.prudentwomen.org']
+ALLOWED_HOSTS = ['app.prudentwomen.org', 'www.app.prudentwomen.org', 'prudent-cooperative-dr3s.onrender.com']
 
 # Application definition
 
