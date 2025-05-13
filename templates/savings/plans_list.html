@@ -53,11 +53,11 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    {% if plan.plan_type.name == 'Investment' %}
+                                    {% if plan.plan_type.name == 'Ordinary' %}
                                         <div class="icon-shape bg-primary-soft text-primary rounded-circle">
                                             <i class="fas fa-chart-line"></i>
                                         </div>
-                                    {% elif plan.plan_type.name == 'Children' %}
+                                    {% elif plan.plan_type.name == 'Special' %}
                                         <div class="icon-shape bg-success-soft text-success rounded-circle">
                                             <i class="fas fa-child"></i>
                                         </div>
@@ -91,7 +91,7 @@
                                     {% if plan.maturity_date %}
                                     <div class="d-flex justify-content-between">
                                         <span class="text-muted">Maturity</span>
-                                        <span class="fw-medium">{{plan.maturity_date|date:"M d, Y"}}</span>
+                                        <!-- <span class="fw-medium">{{plan.maturity_date|date:"M d, Y"}}</span> -->
                                     </div>
                                     {% endif %}
                                 </div>
