@@ -47,7 +47,6 @@
                 </div>
 
                 <div class="row g-3">
-                    {% if savings_plans %}
                     {% for plan in savings_plans %}
                     <div class="col-12 col-sm-6 col-xl-4">
                         <div class="card border-0 shadow-sm h-100">
@@ -106,8 +105,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                    {% else %}
-                    <div class="col-12 text-center py-5">
+                    <!-- <div class="col-12 text-center py-5">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body p-5">
                                 <div class="mb-4">
@@ -120,8 +118,7 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
-                    {% endif %}
+                    </div> -->
                 </div>
 
                 <div class="row mt-5">

@@ -73,7 +73,7 @@ class MembershipApplication(models.Model):
     # Referral Information
     how_did_you_hear = models.CharField(max_length=200, verbose_name="How did you hear about us?")
     referrer_name = models.CharField(max_length=100, blank=True, null=True)
-    referrer_is_member = models.BooleanField(default=False)
+    referrer_is_a_member = models.BooleanField(default=False)
 
     # Payment Information (Combined Payment)
     payment_completed = models.BooleanField(default=False)
