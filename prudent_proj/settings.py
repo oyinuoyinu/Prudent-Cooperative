@@ -32,10 +32,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # # SECURITY WARNING: don't run with debug turned on in production!
 
 # DEBUG = True
-# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['pwcooperative25.pythonanywhere.com', '127.0.0.1', 'localhost', 'www.prudentwomen.finance']
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='1dxpr)p0!=ldc1(!*a8zy$#&3%-@3rl$=aic$n()@y37)quudw')
+DJANGO_DEBUG=False
 DEBUG = config('DJANGO_DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['app.prudentwomen.org', 'www.app.prudentwomen.org', 'prudent-cooperative-dr3s.onrender.com']
+# ALLOWED_HOSTS = ['app.prudentwomen.org', 'www.app.prudentwomen.org', 'prudent-cooperative-dr3s.onrender.com']
 
 # Application definition
 
@@ -108,20 +109,32 @@ WSGI_APPLICATION = "prudent_proj.wsgi.application"
 
 
 # Replace the DATABASES section of your settings.py with this
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+# tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': str(tmpPostgres.path).replace('/', ''),
+#         # 'NAME': tmpPostgres.path.replace('/', ''),
+#         'USER': tmpPostgres.username,
+#         'PASSWORD': tmpPostgres.password,
+#         'HOST': tmpPostgres.hostname,
+#         'PORT': 5432,
+#     }
+# }
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.replace('/', ''),
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'pwcooperative25$prudentwomendb',
+        'USER': 'pwcooperative25',
+        'PASSWORD': 'prudentsecret2025',
+        'HOST': 'pwcooperative25.mysql.pythonanywhere-services.com',
+    'OPTIONS': {
+    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+}
     }
 }
-
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
