@@ -30,7 +30,7 @@ class MembershipApplicationAdmin(admin.ModelAdmin):
             'fields': ('next_of_kin_name', 'next_of_kin_relationship', 'next_of_kin_phone')
         }),
         ('Referral Information', {
-            'fields': ('how_did_you_hear', 'referrer_name', 'referrer_is_member')
+            'fields': ('how_did_you_hear', 'referrer_name', 'referrer_is_a_member')
         }),
         ('Payment Status', {
             'fields': ('payment_completed', 'payment_reference', 'payment_date')

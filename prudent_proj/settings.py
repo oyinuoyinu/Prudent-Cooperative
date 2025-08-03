@@ -249,7 +249,11 @@ PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 MEMBERSHIP_FEE = 2000
 
+
 # Mono Settings
+
+MONO_SECRET_KEY='live_sk_dgjv2brhde13rlavqrrg'
+MONO_PUBLIC_KEY='live_pk_dfaf4zx7zf2x8dzfx731'
 
 # MONO_SECRET_KEY ='test_sk_v0569w0snjimze2ec8rn'
 # MONO_PUBLIC_KEY ='test_pk_bvq5hk0dhkazuftbt2hu'

@@ -144,7 +144,7 @@ class MembershipApplicationForm(forms.ModelForm):
             ),
             Row(
                 Column('referrer_name', css_class='form-group col-md-6 mb-3'),
-                Column('referrer_is_member', css_class='form-group col-md-6 mb-3 mt-4'),
+                Column('referrer_is_a_member', css_class='form-group col-md-6 mb-3 mt-4'),
                 css_class='form-row'
             ),
             Submit('submit', 'Submit Application', css_class='btn btn-primary mt-4')
